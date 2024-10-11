@@ -2,3 +2,5 @@
 *.pyc
 config.ini
 user.ini
+*.lock
+out/

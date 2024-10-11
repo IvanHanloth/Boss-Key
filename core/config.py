@@ -47,6 +47,7 @@ def load_config():
     except:
         Config.mute_after_hide=True
         Config.first_start=True
+        save_config()
 
     Config.hide_f = config.get("hotkey", "hide_f")
     Config.hide_v = config.get("hotkey", "hide_v")

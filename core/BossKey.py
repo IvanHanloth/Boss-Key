@@ -377,4 +377,6 @@ class BossKey():
         Config.HotkeyWindow=HotkeyWindow()
         Config.SettingWindow=SettingWindow()
         Config.TaskBarIcon=TaskBarIcon()
+        if Config.first_start:
+            Config.SettingWindow.Show()
         app.MainLoop()
