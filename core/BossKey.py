@@ -10,6 +10,8 @@ from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
 import wx
 import wx.adv
 from win11toast import notify
+import sys
+
 key_map = {
     "A": 65,
     "B": 66,
@@ -319,6 +321,7 @@ class HotkeyWindow(wx.Frame):
             self.Destroy()
         except:
             pass
+        sys.exit(0)
         
 
     def modifyStartup(self,name: str, file_path: str):
