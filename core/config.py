@@ -18,6 +18,8 @@ class Config:
 
     close_f="Ctrl"
     close_v="."
+
+    mute_after_hide = True
     
     ini_path = os.path.join(os.getcwd(), "config.ini")
     icon=io.BytesIO(get_icon())
@@ -40,6 +42,11 @@ def load_config():
     config.read(Config.ini_path, encoding = "utf-8")
 
     Config.hwnd = config.getint("history", "hwnd")
+    try:
+        Config.mute_after_hide=config.getboolean("setting","mute_after_hide")
+    except:
+        Config.mute_after_hide=True
+        Config.first_start=True
 
     Config.hide_f = config.get("hotkey", "hide_f")
     Config.hide_v = config.get("hotkey", "hide_v")
@@ -52,10 +59,11 @@ def load_config():
 
 def save_config():
     config = RawConfigParser()
+
     config.add_section("history")
-    config.add_section("hotkey")
     config['history']['hwnd']=str(Config.hwnd)
 
+    config.add_section("hotkey")
     config['hotkey']['hide_f']=Config.hide_f
     config['hotkey']['hide_v']=Config.hide_v
 
@@ -64,6 +72,9 @@ def save_config():
 
     config['hotkey']['close_f'] = Config.close_f
     config['hotkey']['close_v'] = Config.close_v
+
+    config.add_section("setting")
+    config['setting']['mute_after_hide']=str(Config.mute_after_hide)
 
     with open(Config.ini_path, 'w', encoding='utf-8') as configfile:
         config.write(configfile)

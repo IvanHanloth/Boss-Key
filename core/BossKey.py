@@ -2,7 +2,11 @@
 from core.config import Config,save_config
 from winreg import OpenKey,HKEY_CURRENT_USER,QueryValueEx,DeleteValue,CloseKey,KEY_ALL_ACCESS,SetValueEx,REG_SZ
 from win32gui import GetForegroundWindow, ShowWindow
-from win32con import SW_HIDE, SW_SHOW
+from win32con import SW_HIDE, SW_SHOW, WM_APP
+import win32process
+import psutil
+from win32api import SendMessage
+from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
 import wx
 import wx.adv
 from win11toast import notify
@@ -166,14 +170,21 @@ class SettingWindow(wx.Dialog):
             StaticText2=wx.StaticText(panel,label="本页面仅在首次启动时自动显示，后续可通过托盘图标打开本页面")
             hbox6.Add(StaticText2, proportion=1, flag=wx.LEFT, border=10)
             vbox.Add(hbox6, proportion=1, flag=wx.EXPAND|wx.BOTTOM, border=10)
-
+        
+        # 创建复选框
+        hbox7 = wx.BoxSizer(wx.HORIZONTAL)
+        Mute_after_hide_label = wx.StaticText(panel, label="隐藏窗口后静音")
+        self.Mute_after_hide_checkbox = wx.CheckBox(panel, -1, "")
+        hbox7.Add(Mute_after_hide_label, proportion=1, flag=wx.LEFT, border=10)
+        hbox7.Add(self.Mute_after_hide_checkbox, proportion=1, flag=wx.LEFT, border=10)
+        vbox.Add(hbox7, proportion=1, flag=wx.BOTTOM, border=10)
 
         # 创建按钮
         hbox5 = wx.BoxSizer(wx.HORIZONTAL)
-        self.Save_btn = wx.Button(panel,size=(100,60), label="保存热键")
         self.Reset_btn = wx.Button(panel,size=(100,60), label="重置热键")
-        hbox5.Add(self.Save_btn, proportion=1, flag=wx.LEFT, border=20)
-        hbox5.Add(self.Reset_btn, proportion=1, flag=wx.RIGHT, border=20)
+        self.Save_btn = wx.Button(panel,size=(100,60), label="保存热键")
+        hbox5.Add(self.Reset_btn, proportion=1, flag=wx.LEFT, border=20)
+        hbox5.Add(self.Save_btn, proportion=1, flag=wx.RIGHT, border=20)
         vbox.Add(hbox5, proportion=1, flag=wx.EXPAND|wx.BOTTOM, border=10)
 
 
@@ -191,7 +202,7 @@ class SettingWindow(wx.Dialog):
         self.CS2_choice.SetStringSelection(Config.startup_v)
         self.CL_choice.SetStringSelection(Config.close_f)
         self.CL2_choice.SetStringSelection(Config.close_v)
-        
+        self.Mute_after_hide_checkbox.SetValue(bool(Config.mute_after_hide))
 
     def OnSave(self,e):
         Config.hide_f=self.SW_choice.GetStringSelection()
@@ -201,8 +212,10 @@ class SettingWindow(wx.Dialog):
         Config.close_f=self.CL_choice.GetStringSelection()
         Config.close_v=self.CL2_choice.GetStringSelection()
         Config.HotkeyWindow.reBind()
+        Config.mute_after_hide=self.Mute_after_hide_checkbox.GetValue()
         save_config()
         wx.MessageDialog(None, u"保存成功", u"Boss_Key", wx.OK | wx.ICON_INFORMATION).ShowModal()
+
     def OnReset(self,e):
         self.SW_choice.SetStringSelection("Ctrl")
         self.SW2_choice.SetStringSelection("Q")
@@ -214,6 +227,11 @@ class SettingWindow(wx.Dialog):
 
 class HotkeyWindow(wx.Frame):
     def __init__(self):
+        try:
+            ShowWindow(Config.hwnd, SW_SHOW)
+            self.changeMute(Config.hwnd,0)
+        except:
+            pass
         wx.Frame.__init__(self, None, title="Boss-Key")
         self.sendNotify("Boss Key正在运行！", "Boss Key正在为您服务，您可通过托盘图标看到我")
         self.reBind()
@@ -233,19 +251,43 @@ class HotkeyWindow(wx.Frame):
         self.Bind(wx.EVT_HOTKEY, self.onClose, id = 3)
 
     def onHide(self,e=""):
-        print("hide")
         Config.hwnd_n = GetForegroundWindow()
         if Config.times == 1:
+            # 隐藏窗口
             ShowWindow(Config.hwnd_n, SW_HIDE)
+            if Config.mute_after_hide:
+                self.changeMute(Config.hwnd_n,1)
             Config.hwnd_b=Config.hwnd_n
             Config.hwnd=Config.hwnd_b
             Config.times = 0
         else:
+            # 显示窗口
             ShowWindow(Config.hwnd_b, SW_SHOW)
+            if Config.mute_after_hide:
+                self.changeMute(Config.hwnd_b,0)
             Config.hwnd_b = ""
             Config.times = 1
         save_config()
 
+    def changeMute(self,hwnd,flag=1):
+        """
+        flag=1 mute
+        """
+        # print(hwnd)
+        # SendMessage(int(hwnd),0x319, 0x200eb0, 0x08*0x10000)
+        hwnd=int(hwnd)
+        process=win32process.GetWindowThreadProcessId(hwnd)
+        sessions = AudioUtilities.GetAllSessions()
+        for session in sessions:
+            volume = session.SimpleAudioVolume
+            # if session.Process:
+            #     print(session.Process.pid)
+            #     print("process[1]",psutil.Process(process[1]))
+            #     print("session.Process",session.Process)
+            if session.Process and session.Process.name() == psutil.Process(process[1]).name():
+                print("mute")
+                volume.SetMute(flag, None)
+                break
     def onStartup(self,e=""):
         try:
             res = self.modifyStartup("Boss Key Application",file_path=Config.file_path)
