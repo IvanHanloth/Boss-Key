@@ -16,8 +16,8 @@ class Config:
     startup_f="Alt"
     startup_v="Q"
 
-    close_f="Ctrl"
-    close_v="."
+    close_f="Win"
+    close_v="Esc"
 
     mute_after_hide = True
     

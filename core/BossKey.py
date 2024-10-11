@@ -169,7 +169,7 @@ class SettingWindow(wx.Dialog):
         #设置提示2
         if Config.first_start:
             hbox6 = wx.BoxSizer(wx.HORIZONTAL)
-            StaticText2=wx.StaticText(panel,label="本页面仅在首次启动时自动显示，后续可通过托盘图标打开本页面")
+            StaticText2=wx.StaticText(panel,label="本页面仅在首次启动或内容有更新时自动显示，后续可通过托盘图标打开本页面")
             hbox6.Add(StaticText2, proportion=1, flag=wx.LEFT, border=10)
             vbox.Add(hbox6, proportion=1, flag=wx.EXPAND|wx.BOTTOM, border=10)
         
@@ -223,8 +223,8 @@ class SettingWindow(wx.Dialog):
         self.SW2_choice.SetStringSelection("Q")
         self.CS_choice.SetStringSelection("Alt")
         self.CS2_choice.SetStringSelection("Q")
-        self.CL_choice.SetStringSelection("Ctrl")
-        self.CL2_choice.SetStringSelection(".")
+        self.CL_choice.SetStringSelection("Win")
+        self.CL2_choice.SetStringSelection("Esc")
         wx.MessageDialog(None, u"已重置选项，请保存热键以启用", u"Boss_Key", wx.OK | wx.ICON_INFORMATION).ShowModal()
 
 class HotkeyWindow(wx.Frame):
@@ -309,21 +309,19 @@ class HotkeyWindow(wx.Frame):
             Config.times = 1
             
         wx.GetApp().Destroy()
-        try:
-            Config.TaskBarIcon.Destroy()
-        except:
-            pass
-        try:            
-            Config.SettingWindow.Close()
-        except:
-            pass
-        try:
-            self.Destroy()
-        except:
-            pass
+        # try:
+        #     Config.TaskBarIcon.Destroy()
+        # except:
+        #     pass
+        # try:            
+        #     Config.SettingWindow.Close()
+        # except:
+        #     pass
+        # try:
+        #     self.Destroy()
+        # except:
+        #     pass
         sys.exit(0)
-        
-
     def modifyStartup(self,name: str, file_path: str):
         key = OpenKey(HKEY_CURRENT_USER, "Software\Microsoft\Windows\CurrentVersion\Run", 0, KEY_ALL_ACCESS)
         try:
@@ -368,11 +366,12 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
         Config.SettingWindow.Show()
 
     def onExit(self,e):
-        try:
-            Config.SettingWindow.Close()
-        except:
-            pass
+        # try:
+        #     Config.SettingWindow.Close()
+        # except:
+        #     pass
         Config.HotkeyWindow.onClose()
+        sys.exit(0)
 
 class BossKey():
     def __init__(self):
