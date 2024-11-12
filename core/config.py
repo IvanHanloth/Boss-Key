@@ -10,14 +10,9 @@ class Config:
     hwnd_n = ''
     times=1
 
-    hide_f="Ctrl"
-    hide_v="Q"
-
-    startup_f="Alt"
-    startup_v="Q"
-
-    close_f="Win"
-    close_v="Esc"
+    hide_hotkey = "Ctrl+Q"
+    startup_hotkey = "Alt+Q"
+    close_hotkey = "Win+Esc"
 
     mute_after_hide = True
     
@@ -32,6 +27,8 @@ class Config:
     HotkeyWindow=""
     TaskBarIcon=""
     
+    recording_hotkey = False
+    recorded_hotkey = None
 
 def load_config():
     if Config.first_start:
@@ -58,6 +55,10 @@ def load_config():
     Config.close_f = config.get("hotkey", "close_f")
     Config.close_v = config.get("hotkey", "close_v")
 
+    Config.hide_hotkey = config.get("hotkey", "hide_hotkey", fallback="Ctrl+Q")
+    Config.startup_hotkey = config.get("hotkey", "startup_hotkey", fallback="Alt+Q")
+    Config.close_hotkey = config.get("hotkey", "close_hotkey", fallback="Win+Esc")
+
 def save_config():
     config = RawConfigParser()
 
@@ -73,6 +74,10 @@ def save_config():
 
     config['hotkey']['close_f'] = Config.close_f
     config['hotkey']['close_v'] = Config.close_v
+
+    config['hotkey']['hide_hotkey'] = Config.hide_hotkey
+    config['hotkey']['startup_hotkey'] = Config.startup_hotkey
+    config['hotkey']['close_hotkey'] = Config.close_hotkey
 
     config.add_section("setting")
     config['setting']['mute_after_hide']=str(Config.mute_after_hide)
