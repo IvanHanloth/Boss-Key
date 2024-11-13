@@ -205,6 +205,8 @@ class SettingWindow(wx.Dialog):
                 return 'Enter'
             elif key_name == 'cmd':
                 return 'Win'
+            elif key_name == 'button.middle':
+                return 'MIDDLE'
             else:
                 return key.name.upper()
         else:
@@ -229,15 +231,14 @@ class HotkeyWindow(wx.Frame):
 
     def expandHotkeys(self):
         expanded_hotkeys = {}
-        need_check={}
-        flag=True
+        need_check = {}
+        flag = True
         # 将self.hotkeys中的每一项的键修改为小写
         for hotkey, action in self.hotkeys.items():
             hotkey = hotkey.lower()
             need_check[hotkey] = action
         while flag:
-            print(need_check)
-            flag=False
+            flag = False
             this_round = need_check.copy()
             for hotkey, action in this_round.items():
                 hotkey = hotkey.lower()
@@ -251,7 +252,7 @@ class HotkeyWindow(wx.Frame):
                     keys.remove('<ctrl_l>')
                     keys.append('<ctrl_r>')
                     need_check['+'.join(keys)] = action
-                    flag=True
+                    flag = True
                     continue
                 elif 'alt' in keys:
                     del need_check['+'.join(keys)]
@@ -259,11 +260,11 @@ class HotkeyWindow(wx.Frame):
                     keys.append('<alt_l>')
 
                     need_check['+'.join(keys)] = action
-                    
+
                     keys.remove('<alt_l>')
                     keys.append('<alt_r>')
                     need_check['+'.join(keys)] = action
-                    flag=True
+                    flag = True
                     continue
                 elif 'shift' in keys:
                     del need_check['+'.join(keys)]
@@ -274,32 +275,39 @@ class HotkeyWindow(wx.Frame):
                     keys.remove('<shift_l>')
                     keys.append('<shift_r>')
                     need_check['+'.join(keys)] = action
-                    flag=True
+                    flag = True
                     continue
                 elif 'win' in keys:
                     del need_check['+'.join(keys)]
                     keys.remove('win')
                     keys.append('<cmd>')
                     need_check['+'.join(keys)] = action
-                    flag=True
+                    flag = True
                     continue
                 elif 'esc' in keys:
                     del need_check['+'.join(keys)]
                     keys.remove('esc')
                     keys.append('<esc>')
                     need_check['+'.join(keys)] = action
-                    flag=True
+                    flag = True
                     continue
                 elif 'enter' in keys:
                     del need_check['+'.join(keys)]
                     keys.remove('enter')
                     keys.append('<enter>')
                     need_check['+'.join(keys)] = action
-                    flag=True
+                    flag = True
+                    continue
+                elif 'middle' in keys:
+                    del need_check['+'.join(keys)]
+                    keys.remove('middle')
+                    keys.append('<button.middle>')
+                    need_check['+'.join(keys)] = action
+                    flag = True
                     continue
                 else:
                     expanded_hotkeys['+'.join(keys)] = action
-            
+
         self.hotkeys = expanded_hotkeys
 
     def BindHotKey(self):
@@ -390,6 +398,29 @@ class HotkeyWindow(wx.Frame):
     def sendNotify(self,title,message):
         notify(title,message,icon=Config.icon_info,duration="short")
     
+    def getKeyName(self, key):
+        if hasattr(key, 'char') and key.char is not None:
+            return key.char.upper()
+        elif hasattr(key, 'name') and key.name is not None:
+            key_name = key.name.lower()
+            if key_name in ('ctrl_l', 'ctrl_r'):
+                return 'Ctrl'
+            elif key_name in ('alt_l', 'alt_r', 'alt_gr'):
+                return 'Alt'
+            elif key_name in ('shift_l', 'shift_r'):
+                return 'Shift'
+            elif key_name == 'esc':
+                return 'Esc'
+            elif key_name == 'enter':
+                return 'Enter'
+            elif key_name == 'cmd':
+                return 'Win'
+            elif key_name == 'button.middle':
+                return 'MIDDLE'
+            else:
+                return key.name.upper()
+        else:
+            return str(key).upper()
 
 class TaskBarIcon(wx.adv.TaskBarIcon):
 
