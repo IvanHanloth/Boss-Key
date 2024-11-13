@@ -46,15 +46,6 @@ def load_config():
         Config.first_start=True
         save_config()
 
-    Config.hide_f = config.get("hotkey", "hide_f")
-    Config.hide_v = config.get("hotkey", "hide_v")
-
-    Config.startup_f = config.get("hotkey", "startup_f")
-    Config.startup_v = config.get("hotkey", "startup_v")
-
-    Config.close_f = config.get("hotkey", "close_f")
-    Config.close_v = config.get("hotkey", "close_v")
-
     Config.hide_hotkey = config.get("hotkey", "hide_hotkey", fallback="Ctrl+Q")
     Config.startup_hotkey = config.get("hotkey", "startup_hotkey", fallback="Alt+Q")
     Config.close_hotkey = config.get("hotkey", "close_hotkey", fallback="Win+Esc")
@@ -66,15 +57,6 @@ def save_config():
     config['history']['hwnd']=str(Config.hwnd)
 
     config.add_section("hotkey")
-    config['hotkey']['hide_f']=Config.hide_f
-    config['hotkey']['hide_v']=Config.hide_v
-
-    config['hotkey']['startup_f'] = Config.startup_f
-    config['hotkey']['startup_v'] = Config.startup_v
-
-    config['hotkey']['close_f'] = Config.close_f
-    config['hotkey']['close_v'] = Config.close_v
-
     config['hotkey']['hide_hotkey'] = Config.hide_hotkey
     config['hotkey']['startup_hotkey'] = Config.startup_hotkey
     config['hotkey']['close_hotkey'] = Config.close_hotkey

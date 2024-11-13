@@ -111,13 +111,10 @@ class SettingWindow(wx.Dialog):
         self.CL_text.SetValue(Config.close_hotkey)
         self.Mute_after_hide_checkbox.SetValue(bool(Config.mute_after_hide))
 
-    def formatHotkey(self, hotkey):
-        return hotkey.replace('Ctrl', '<ctrl>').replace('Alt', '<alt>').replace('Shift', '<shift>').replace('Win', '<win>')
-
     def OnSave(self,e):
-        Config.hide_hotkey = self.formatHotkey(self.SW_text.GetValue())
-        Config.startup_hotkey = self.formatHotkey(self.CS_text.GetValue())
-        Config.close_hotkey = self.formatHotkey(self.CL_text.GetValue())
+        Config.hide_hotkey = self.SW_text.GetValue()
+        Config.startup_hotkey = self.CS_text.GetValue()
+        Config.close_hotkey = self.CL_text.GetValue()
         Config.HotkeyWindow.reBind()
         Config.mute_after_hide = self.Mute_after_hide_checkbox.GetValue()
         save_config()
@@ -197,15 +194,15 @@ class SettingWindow(wx.Dialog):
         elif hasattr(key, 'name') and key.name is not None:
             key_name = key.name.lower()
             if key_name in ('ctrl_l', 'ctrl_r'):
-                return 'CTRL'
+                return 'Ctrl'
             elif key_name in ('alt_l', 'alt_r', 'alt_gr'):
-                return 'ALT'
+                return 'Alt'
             elif key_name in ('shift_l', 'shift_r'):
-                return 'SHIFT'
-            # elif key_name == 'esc':
-            #     return 'ESC'
-            # elif key_name == 'enter':
-            #     return 'ENTER'
+                return 'Shift'
+            elif key_name == 'esc':
+                return 'Esc'
+            elif key_name == 'enter':
+                return 'Enter'
             elif key_name == 'cmd':
                 return 'Win'
             else:
@@ -234,14 +231,19 @@ class HotkeyWindow(wx.Frame):
         expanded_hotkeys = {}
         need_check={}
         flag=True
-        need_check.update(self.hotkeys)
+        # 将self.hotkeys中的每一项的键修改为小写
+        for hotkey, action in self.hotkeys.items():
+            hotkey = hotkey.lower()
+            need_check[hotkey] = action
         while flag:
+            print(need_check)
             flag=False
             this_round = need_check.copy()
             for hotkey, action in this_round.items():
                 hotkey = hotkey.lower()
                 keys = hotkey.split('+')
                 if 'ctrl' in keys:
+                    del need_check['+'.join(keys)]
                     keys.remove('ctrl')
                     keys.append('<ctrl_l>')
                     need_check['+'.join(keys)] = action
@@ -252,6 +254,7 @@ class HotkeyWindow(wx.Frame):
                     flag=True
                     continue
                 elif 'alt' in keys:
+                    del need_check['+'.join(keys)]
                     keys.remove('alt')
                     keys.append('<alt_l>')
 
@@ -263,6 +266,7 @@ class HotkeyWindow(wx.Frame):
                     flag=True
                     continue
                 elif 'shift' in keys:
+                    del need_check['+'.join(keys)]
                     keys.remove('shift')
                     keys.append('<shift_l>')
                     need_check['+'.join(keys)] = action
@@ -273,18 +277,21 @@ class HotkeyWindow(wx.Frame):
                     flag=True
                     continue
                 elif 'win' in keys:
+                    del need_check['+'.join(keys)]
                     keys.remove('win')
                     keys.append('<cmd>')
                     need_check['+'.join(keys)] = action
                     flag=True
                     continue
                 elif 'esc' in keys:
+                    del need_check['+'.join(keys)]
                     keys.remove('esc')
                     keys.append('<esc>')
                     need_check['+'.join(keys)] = action
                     flag=True
                     continue
                 elif 'enter' in keys:
+                    del need_check['+'.join(keys)]
                     keys.remove('enter')
                     keys.append('<enter>')
                     need_check['+'.join(keys)] = action
