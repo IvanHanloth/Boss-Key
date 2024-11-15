@@ -21,6 +21,12 @@ jobs:
         with:
           python-version: '3.11'
 
+      # 安装 gcc
+      - name: Install gcc
+        run: |
+          choco install mingw
+        shell: cmd
+
       # 安装依赖和 Nuitka
       - name: Install dependencies
         run: |
