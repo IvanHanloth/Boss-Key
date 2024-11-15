@@ -212,14 +212,13 @@ class SettingWindow(wx.Dialog):
         else:
             return str(key).upper()
 
-class HotkeyWindow(wx.Frame):
+class HotkeyWindow():
     def __init__(self):
         try:
             ShowWindow(Config.hwnd, SW_SHOW)
             self.changeMute(Config.hwnd,0)
         except:
             pass
-        wx.Frame.__init__(self, None, title="Boss-Key")
         self.sendNotify("Boss Key正在运行！", "Boss Key正在为您服务，您可通过托盘图标看到我")
         self.listener = None
         self.reBind()
@@ -246,34 +245,21 @@ class HotkeyWindow(wx.Frame):
                 if 'ctrl' in keys:
                     del need_check['+'.join(keys)]
                     keys.remove('ctrl')
-                    keys.append('<ctrl_l>')
-                    need_check['+'.join(keys)] = action
-
-                    keys.remove('<ctrl_l>')
-                    keys.append('<ctrl_r>')
+                    keys.append('<ctrl>')
                     need_check['+'.join(keys)] = action
                     flag = True
                     continue
                 elif 'alt' in keys:
                     del need_check['+'.join(keys)]
                     keys.remove('alt')
-                    keys.append('<alt_l>')
-
-                    need_check['+'.join(keys)] = action
-
-                    keys.remove('<alt_l>')
-                    keys.append('<alt_r>')
+                    keys.append('<alt>')
                     need_check['+'.join(keys)] = action
                     flag = True
                     continue
                 elif 'shift' in keys:
                     del need_check['+'.join(keys)]
                     keys.remove('shift')
-                    keys.append('<shift_l>')
-                    need_check['+'.join(keys)] = action
-
-                    keys.remove('<shift_l>')
-                    keys.append('<shift_r>')
+                    keys.append('<shift>')
                     need_check['+'.join(keys)] = action
                     flag = True
                     continue
@@ -377,6 +363,8 @@ class HotkeyWindow(wx.Frame):
             Config.hwnd_b = ""
             Config.times = 1
             
+        if self.listener:
+            self.listener.stop()
         wx.GetApp().Destroy()
         sys.exit(0)
     def modifyStartup(self,name: str, file_path: str):
