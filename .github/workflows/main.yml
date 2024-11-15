@@ -34,7 +34,7 @@ jobs:
           pip install -r requirements.txt
         shell: cmd
 
-      # 运行 nuitka-pack.bat 文件
+      # 进行编译
       - name: Run Compile
         run: |
 
@@ -45,7 +45,7 @@ jobs:
               $parts += '0'
             }
             $tag = $parts -join '.'
-            python -m nuitka --windows-disable-console --onefile --standalone --follow-import-to=core --windows-icon-from-ico=icon.ico --windows-file-version=$tag --windows-product-name="Boss Key" --windows-file-description="Boss Key Application" --include-data-file=icon.ico=. --windows-company-name="Ivan Hanloth" --show-progress --mingw64 --copyright="Copyright (C) 2024 Ivan Hanloth All Rights Reserved. " --quiet --output-dir=out Boss-Key.py
+            python -m nuitka --windows-disable-console --onefile --standalone --follow-import-to=core --windows-icon-from-ico=icon.ico --windows-file-version=$tag --windows-product-name="Boss Key" --windows-file-description="Boss Key Application" --include-data-file=icon.ico=. --windows-company-name="Ivan Hanloth" --show-progress --mingw64 --copyright="Copyright (C) 2024 Ivan Hanloth All Rights Reserved. " --quiet --assume-yes-for-downloads --output-dir=out Boss-Key.py
 
       # 添加版本信息到可执行文件并重命名
       - name: Add version information and rename executable
