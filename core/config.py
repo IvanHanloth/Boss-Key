@@ -46,9 +46,22 @@ def load_config():
         Config.first_start=True
         save_config()
 
-    Config.hide_hotkey = config.get("hotkey", "hide_hotkey", fallback="Ctrl+Q")
-    Config.startup_hotkey = config.get("hotkey", "startup_hotkey", fallback="Alt+Q")
-    Config.close_hotkey = config.get("hotkey", "close_hotkey", fallback="Win+Esc")
+    old_version=False
+    try:
+        Config.hide_hotkey = config.get("hotkey", "hide_f") +config.get("hotkey", "hide_v") 
+        Config.startup_hotkey = config.get("hotkey", "startup_f") +config.get("hotkey", "startup_v")
+        Config.close_hotkey = config.get("hotkey", "close_f") +config.get("hotkey", "close_v")
+        Config.first_start=True
+        old_version=True
+        ## 适配老版本数据
+    except:
+        pass
+    save_config()
+    if not old_version: 
+        # 没有使用老版本
+        Config.hide_hotkey = config.get("hotkey", "hide_hotkey", fallback="Ctrl+Q")
+        Config.startup_hotkey = config.get("hotkey", "startup_hotkey", fallback="Alt+Q")
+        Config.close_hotkey = config.get("hotkey", "close_hotkey", fallback="Win+Esc")
 
 def save_config():
     config = RawConfigParser()
