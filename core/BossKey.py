@@ -140,15 +140,15 @@ class SettingWindow(wx.Dialog):
         self.keys_pressed = set()
         self.keys_recorded = set()
         self.mouse_pressed = set()
-        text_ctrl.SetValue("请按下热键组合（包括鼠标按键）...")
+        text_ctrl.SetValue("请按下热键组合...")
 
         self.keyboard_listener = keyboard.Listener(
             on_press=self.onKeyPress,
             on_release=self.onKeyRelease)
-        self.mouse_listener = mouse.Listener(
-            on_click=self.onClick)
+        # self.mouse_listener = mouse.Listener(
+            # on_click=self.onClick)
         self.keyboard_listener.start()
-        self.mouse_listener.start()
+        # self.mouse_listener.start()
 
         self.text_ctrl = text_ctrl
 
@@ -183,9 +183,9 @@ class SettingWindow(wx.Dialog):
         if self.keyboard_listener:
             self.keyboard_listener.stop()
             self.keyboard_listener = None
-        if self.mouse_listener:
-            self.mouse_listener.stop()
-            self.mouse_listener = None
+        # if self.mouse_listener:
+        #     self.mouse_listener.stop()
+        #     self.mouse_listener = None
         self.recording = False
 
     def getKeyName(self, key):
@@ -239,55 +239,52 @@ class HotkeyWindow():
         while flag:
             flag = False
             this_round = need_check.copy()
+            function_keys=[
+                'ctrl',
+                'alt',
+                'shift',
+                'esc',
+                'enter',
+                'cmd',
+                'page_up',
+                'page_down',
+                'home',
+                'end',
+                'insert',
+                'delete',
+                'backspace',
+                'space',
+                'up',
+                'down',
+                'left',
+                'right',
+                'tab',
+                'caps_lock',
+                'num_lock',
+                'scroll_lock',
+                'print_screen',
+                'pause',
+                'menu'
+            ]
+            for i in range(1,13):
+                function_keys.append(f'f{i}')
             for hotkey, action in this_round.items():
                 hotkey = hotkey.lower()
                 keys = hotkey.split('+')
-                if 'ctrl' in keys:
+                intersect = list(set(keys) & set(function_keys))
+                if len(intersect)>=1:
+                    i=intersect[0]
                     del need_check['+'.join(keys)]
-                    keys.remove('ctrl')
-                    keys.append('<ctrl>')
+                    keys.remove(i)
+                    keys.append(f"<{i}>")
                     need_check['+'.join(keys)] = action
                     flag = True
                     continue
-                elif 'alt' in keys:
-                    del need_check['+'.join(keys)]
-                    keys.remove('alt')
-                    keys.append('<alt>')
-                    need_check['+'.join(keys)] = action
-                    flag = True
-                    continue
-                elif 'shift' in keys:
-                    del need_check['+'.join(keys)]
-                    keys.remove('shift')
-                    keys.append('<shift>')
-                    need_check['+'.join(keys)] = action
-                    flag = True
-                    continue
-                elif 'win' in keys:
+
+                if 'win' in keys:
                     del need_check['+'.join(keys)]
                     keys.remove('win')
                     keys.append('<cmd>')
-                    need_check['+'.join(keys)] = action
-                    flag = True
-                    continue
-                elif 'esc' in keys:
-                    del need_check['+'.join(keys)]
-                    keys.remove('esc')
-                    keys.append('<esc>')
-                    need_check['+'.join(keys)] = action
-                    flag = True
-                    continue
-                elif 'enter' in keys:
-                    del need_check['+'.join(keys)]
-                    keys.remove('enter')
-                    keys.append('<enter>')
-                    need_check['+'.join(keys)] = action
-                    flag = True
-                    continue
-                elif 'middle' in keys:
-                    del need_check['+'.join(keys)]
-                    keys.remove('middle')
-                    keys.append('<button.middle>')
                     need_check['+'.join(keys)] = action
                     flag = True
                     continue
@@ -386,31 +383,6 @@ class HotkeyWindow():
 
     def sendNotify(self,title,message):
         notify(title,message,icon=Config.icon_info,duration="short")
-    
-    def getKeyName(self, key):
-        if hasattr(key, 'char') and key.char is not None:
-            return key.char.upper()
-        elif hasattr(key, 'name') and key.name is not None:
-            key_name = key.name.lower()
-            if key_name in ('ctrl_l', 'ctrl_r'):
-                return 'Ctrl'
-            elif key_name in ('alt_l', 'alt_r', 'alt_gr'):
-                return 'Alt'
-            elif key_name in ('shift_l', 'shift_r'):
-                return 'Shift'
-            elif key_name == 'esc':
-                return 'Esc'
-            elif key_name == 'enter':
-                return 'Enter'
-            elif key_name == 'cmd':
-                return 'Win'
-            elif key_name == 'button.middle':
-                return 'MIDDLE'
-            else:
-                return key.name.upper()
-        else:
-            return str(key).upper()
-
 class TaskBarIcon(wx.adv.TaskBarIcon):
 
     MENU_ID1,MENU_ID2 = wx.NewIdRef(count=2)
@@ -435,9 +407,5 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
         Config.SettingWindow.Show()
 
     def onExit(self,e):
-        # try:
-        #     Config.SettingWindow.Close()
-        # except:
-        #     pass
         Config.HotkeyWindow.onClose()
         sys.exit(0)
