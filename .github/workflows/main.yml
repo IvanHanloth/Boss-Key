@@ -1,0 +1,58 @@
+name: Release on Tag
+
+on:
+  push:
+    tags:
+      - '*'  # 监听所有标签的推送事件
+
+jobs:
+  build-and-release:
+    runs-on: windows-2022  # 使用最新的 Windows 运行器
+
+    steps:
+      # 检出仓库代码
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 设置 Python 3.11 环境
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      # 安装依赖和 Nuitka
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+        shell: cmd
+
+      # 运行 nuitka-pack.bat 文件
+      - name: Run nuitka-pack.bat
+        run: |
+          .\nuitka-pack.bat
+        shell: cmd
+
+      # 添加版本信息到可执行文件并重命名
+      - name: Add version information and rename executable
+        shell: pwsh
+        run: |
+  
+          # 获取标签名作为版本号，去除前缀 refs/tags/
+          $tag = '${{ github.ref_name }}'
+  
+          # 定义新的文件名
+          $newExeName = "Boss-Key-$tag.exe"
+          
+          # 重命名可执行文件
+          Rename-Item "out\Boss-Key.exe" $newExeName
+
+      # 发布到 GitHub Releases
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ github.ref_name }}  # 使用触发的标签
+          name: Release ${{ github.ref_name }}  # 发布名称
+          draft: false
+          prerelease: false
+          files: out/Boss-Key-${{ github.ref_name }}.exe  # 附加生成的可执行文件
