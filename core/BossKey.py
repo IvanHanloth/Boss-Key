@@ -365,7 +365,8 @@ class HotkeyWindow():
             
         if self.listener:
             self.listener.stop()
-        wx.GetApp().Destroy()
+        Config.TaskBarIcon.Destroy()
+        Config.SettingWindow.Destroy()
         sys.exit(0)
     def modifyStartup(self,name: str, file_path: str):
         key = OpenKey(HKEY_CURRENT_USER, "Software\Microsoft\Windows\CurrentVersion\Run", 0, KEY_ALL_ACCESS)
@@ -440,13 +441,3 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
         #     pass
         Config.HotkeyWindow.onClose()
         sys.exit(0)
-
-class BossKey():
-    def __init__(self):
-        app = wx.App()
-        Config.HotkeyWindow=HotkeyWindow()
-        Config.SettingWindow=SettingWindow()
-        Config.TaskBarIcon=TaskBarIcon()
-        if Config.first_start:
-            Config.SettingWindow.Show()
-        app.MainLoop()

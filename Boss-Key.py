@@ -1,8 +1,10 @@
-from core.BossKey import BossKey
+from core import BossKey
 import sys
 import ctypes
 import os
 import psutil
+import wx
+from core.config import Config
 
 errorCode = ctypes.windll.shcore.SetProcessDpiAwareness(2) # Win10 and Win8
 success = ctypes.windll.user32.SetProcessDPIAware() #Win7 and below
@@ -36,6 +38,11 @@ if is_already_running(sys.argv[0][:-4]+".lock"):
     windows_message_box("Boss Key", "Boss Key is already running")
     sys.exit(0)
 else:
-    Boss_Key=BossKey()
-    Boss_Key.Start()
+    app = wx.App()
+    Config.HotkeyWindow=BossKey.HotkeyWindow()
+    Config.SettingWindow=BossKey.SettingWindow()
+    Config.TaskBarIcon=BossKey.TaskBarIcon()
+    if Config.first_start:
+        Config.SettingWindow.Show()
+    app.MainLoop()
     
