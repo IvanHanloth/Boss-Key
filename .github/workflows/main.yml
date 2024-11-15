@@ -33,6 +33,12 @@ jobs:
         run: |
 
             $tag = '${{ github.ref_name }}'
+            $tag = $tag -replace '[^0-9.]', ''
+            $parts = $tag.Split('.')
+            while ($parts.Length -lt 4) {
+              $parts += '0'
+            }
+            $tag = $parts -join '.'
             python -m nuitka --windows-disable-console --onefile --standalone --follow-import-to=core --windows-icon-from-ico=icon.ico --windows-file-version=$tag --windows-product-name="Boss Key" --windows-file-description="Boss Key Application" --include-data-file=icon.ico=. --windows-company-name="Ivan Hanloth" --show-progress --mingw64 --copyright="Copyright (C) 2024 Ivan Hanloth All Rights Reserved. " --quiet --output-dir=out Boss-Key.py
 
       # 添加版本信息到可执行文件并重命名
