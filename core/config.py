@@ -10,14 +10,9 @@ class Config:
     hwnd_n = ''
     times=1
 
-    hide_f="Ctrl"
-    hide_v="Q"
-
-    startup_f="Alt"
-    startup_v="Q"
-
-    close_f="Win"
-    close_v="Esc"
+    hide_hotkey = "Ctrl+Q"
+    startup_hotkey = "Alt+Q"
+    close_hotkey = "Win+Esc"
 
     mute_after_hide = True
     
@@ -32,6 +27,8 @@ class Config:
     HotkeyWindow=""
     TaskBarIcon=""
     
+    recording_hotkey = False
+    recorded_hotkey = None
 
 def load_config():
     if Config.first_start:
@@ -49,14 +46,22 @@ def load_config():
         Config.first_start=True
         save_config()
 
-    Config.hide_f = config.get("hotkey", "hide_f")
-    Config.hide_v = config.get("hotkey", "hide_v")
-
-    Config.startup_f = config.get("hotkey", "startup_f")
-    Config.startup_v = config.get("hotkey", "startup_v")
-
-    Config.close_f = config.get("hotkey", "close_f")
-    Config.close_v = config.get("hotkey", "close_v")
+    old_version=False
+    try:
+        Config.hide_hotkey = config.get("hotkey", "hide_f") +config.get("hotkey", "hide_v") 
+        Config.startup_hotkey = config.get("hotkey", "startup_f") +config.get("hotkey", "startup_v")
+        Config.close_hotkey = config.get("hotkey", "close_f") +config.get("hotkey", "close_v")
+        Config.first_start=True
+        old_version=True
+        ## 适配老版本数据
+    except:
+        pass
+    save_config()
+    if not old_version: 
+        # 没有使用老版本
+        Config.hide_hotkey = config.get("hotkey", "hide_hotkey", fallback="Ctrl+Q")
+        Config.startup_hotkey = config.get("hotkey", "startup_hotkey", fallback="Alt+Q")
+        Config.close_hotkey = config.get("hotkey", "close_hotkey", fallback="Win+Esc")
 
 def save_config():
     config = RawConfigParser()
@@ -65,14 +70,9 @@ def save_config():
     config['history']['hwnd']=str(Config.hwnd)
 
     config.add_section("hotkey")
-    config['hotkey']['hide_f']=Config.hide_f
-    config['hotkey']['hide_v']=Config.hide_v
-
-    config['hotkey']['startup_f'] = Config.startup_f
-    config['hotkey']['startup_v'] = Config.startup_v
-
-    config['hotkey']['close_f'] = Config.close_f
-    config['hotkey']['close_v'] = Config.close_v
+    config['hotkey']['hide_hotkey'] = Config.hide_hotkey
+    config['hotkey']['startup_hotkey'] = Config.startup_hotkey
+    config['hotkey']['close_hotkey'] = Config.close_hotkey
 
     config.add_section("setting")
     config['setting']['mute_after_hide']=str(Config.mute_after_hide)
