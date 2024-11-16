@@ -21,12 +21,6 @@ jobs:
         with:
           python-version: '3.11'
 
-      # 安装 gcc
-      # - name: Install gcc
-      #   run: |
-      #     choco install mingw
-      #   shell: cmd
-
       # 安装依赖和 Nuitka
       - name: Install dependencies
         run: |
@@ -47,38 +41,6 @@ jobs:
             $tag = $parts -join '.'
             python -m nuitka --windows-disable-console --onefile --standalone --follow-import-to=core --windows-icon-from-ico=icon.ico --windows-file-version=$tag --windows-product-name="Boss Key" --windows-file-description="Boss Key Application" --include-data-file=icon.ico=. --windows-company-name="Ivan Hanloth" --show-progress --mingw64 --copyright="Copyright (C) 2024 Ivan Hanloth All Rights Reserved. " --quiet --assume-yes-for-downloads --output-dir=out Boss-Key.py
 
-      # Build python script into a stand-alone exe
-      # - uses: Nuitka/Nuitka-Action@main
-      #   with:
-      #     nuitka-version: main
-      #     script-name: Boss-Key.py
-      #     output-dir: out
-      #     one-file: true
-      #     standalone: true
-      #     follow-import-to: core
-      #     windows-disable-console: true
-      #     windows-icon-from-ico: icon.ico
-      #     windows-file-version: ${{ steps.format_version.outputs.formatted_version }}
-      #     windows-product-name: "Boss Key"
-      #     windows-file-description: "Boss Key Application"
-      #     windows-company-name: "Ivan Hanloth"
-      #     include-data-file: icon.ico=.
-      #     show-progress: true
-      #     mingw64: true
-      #     quiet: true
-      #     assume-yes-for-downloads: true
-
-      # - name: Format version
-      #   id: format_version
-      #   run: |
-      #     $tag = '${{ github.ref_name }}' -replace 'refs/tags/', '' -replace '^v', ''
-      #     $parts = $tag.Split('.')
-      #     while ($parts.Length -lt 4) {
-      #       $parts += '0'
-      #     }
-      #     $formatted_version = $parts -join '.'
-      #     echo "::set-output name=formatted_version::$formatted_version"
-      #   shell: pwsh
 
       # 添加版本信息到可执行文件并重命名
       - name: Add version information and rename executable
@@ -88,33 +50,29 @@ jobs:
           $tag = '${{ github.ref_name }}'
   
           # 定义新的文件名
-          $newExeName = "Boss-Key-$tag.exe"
+          $newExeName = "Boss-Key-$tag-onefile.exe"
           
           # 重命名可执行文件
           Rename-Item "out/Boss-Key.exe" $newExeName
 
-          ls out
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ github.ref_name }} Build
-          path: |
-            out/Boss-Key-${{ github.ref_name }}.exe
-            
-      # 发布到 GitHub Releases
-      # - name: Create GitHub Release
-      #   uses: ncipollo/release-action@v1
-      #   with:
-      #     tag: ${{ github.ref_name }}  # 使用触发的标签
-      #     name: Release ${{ github.ref_name }}  # 发布名称
-      #     draft: false
-      #     prerelease: false
-      #     files: out/Boss-Key-${{ github.ref_name }}.exe  # 附加生成的可执行文件
+          # 压缩out/Boss-Key.dist/文件夹
+          Compress-Archive -Path "out/Boss-Key.dist" -DestinationPath "out/Boss-Key-$tag-multifile.zip"
 
+          ls out
+      # - name: Upload Artifacts
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: ${{ github.ref_name }} Build
+      #     path: |
+      #       out/Boss-Key-${{ github.ref_name }}.exe
+            
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          files: out/Boss-Key-${{ github.ref_name }}.exe
+          files: |
+           out/Boss-Key-${{ github.ref_name }}-onefile.exe
+           out/Boss-Key-${{ github.ref_name }}-multifile.zip
+           
           token: ${{ secrets.RELEASE }}
           name: Boss Key ${{ github.ref_name }}
           append_body: |
@@ -123,3 +81,4 @@ jobs:
           tag_name: ${{ github.ref_name }}
           draft: false
           prerelease: false
+          generate_release_notes: true
