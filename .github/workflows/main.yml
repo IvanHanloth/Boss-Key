@@ -54,7 +54,7 @@ jobs:
           output-dir: out
           windows-disable-console: true
           windows-icon-from-ico: icon.ico
-          windows-file-version: ${{ github.ref_name -replace 'refs/tags/v', '' }}
+          windows-file-version: ${{ steps.format_version.outputs.formatted_version }}
           windows-product-name: "Boss Key"
           windows-file-description: "Boss Key Application"
           windows-company-name: "Ivan Hanloth"
@@ -64,7 +64,17 @@ jobs:
           quiet: true
           assume-yes-for-downloads: true
 
-
+      - name: Format version
+        id: format_version
+        run: |
+          $tag = '${{ github.ref_name }}' -replace 'refs/tags/', '' -replace '^v', ''
+          $parts = $tag.Split('.')
+          while ($parts.Length -lt 4) {
+            $parts += '0'
+          }
+          $formatted_version = $parts -join '.'
+          echo "::set-output name=formatted_version::$formatted_version"
+        shell: pwsh
 
       # 添加版本信息到可执行文件并重命名
       - name: Add version information and rename executable
