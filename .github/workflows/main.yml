@@ -22,10 +22,10 @@ jobs:
           python-version: '3.11'
 
       # 安装 gcc
-      - name: Install gcc
-        run: |
-          choco install mingw
-        shell: cmd
+      # - name: Install gcc
+      #   run: |
+      #     choco install mingw
+      #   shell: cmd
 
       # 安装依赖和 Nuitka
       - name: Install dependencies
@@ -59,14 +59,28 @@ jobs:
           $newExeName = "Boss-Key-$tag.exe"
           
           # 重命名可执行文件
-          Rename-Item "out\Boss-Key.exe" $newExeName
+          rename "out/Boss-Key.exe" $newExeName
+
+          ls out
 
       # 发布到 GitHub Releases
-      - name: Create GitHub Release
-        uses: ncipollo/release-action@v1
+      # - name: Create GitHub Release
+      #   uses: ncipollo/release-action@v1
+      #   with:
+      #     tag: ${{ github.ref_name }}  # 使用触发的标签
+      #     name: Release ${{ github.ref_name }}  # 发布名称
+      #     draft: false
+      #     prerelease: false
+      #     files: out/Boss-Key-${{ github.ref_name }}.exe  # 附加生成的可执行文件
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
         with:
-          tag: ${{ github.ref_name }}  # 使用触发的标签
-          name: Release ${{ github.ref_name }}  # 发布名称
+          files: out/Boss-Key-$tag.exe
+          token: ${{ secrets.GITHUB_TOKEN }}
+          release_name: Release $tag
+          body: |
+            This is a release for version $tag
+          tag_name: $tag
           draft: false
           prerelease: false
-          files: out/Boss-Key-${{ github.ref_name }}.exe  # 附加生成的可执行文件
