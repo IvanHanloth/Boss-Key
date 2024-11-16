@@ -52,6 +52,9 @@ jobs:
           nuitka-version: main
           script-name: Boss-Key.py
           output-dir: out
+          one-file: true
+          standalone: true
+          follow-import-to: core
           windows-disable-console: true
           windows-icon-from-ico: icon.ico
           windows-file-version: ${{ steps.format_version.outputs.formatted_version }}
