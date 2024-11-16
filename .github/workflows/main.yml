@@ -37,7 +37,6 @@ jobs:
       # 进行编译
       - name: Run Compile
         run: |
-
             $tag = '${{ github.ref_name }}'
             $tag = $tag -replace '[^0-9.]', ''
             $parts = $tag.Split('.')
@@ -51,7 +50,6 @@ jobs:
       - name: Add version information and rename executable
         shell: pwsh
         run: |
-  
           # 获取标签名作为版本号，去除前缀 refs/tags/
           $tag = '${{ github.ref_name }}'
   
@@ -59,7 +57,7 @@ jobs:
           $newExeName = "Boss-Key-$tag.exe"
           
           # 重命名可执行文件
-          rename "out/Boss-Key.exe" $newExeName
+          Rename-Item "out/Boss-Key.exe" $newExeName
 
           ls out
 
@@ -76,11 +74,11 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          files: out/Boss-Key-$tag.exe
+          files: out/Boss-Key-${{ github.ref_name }}.exe
           token: ${{ secrets.GITHUB_TOKEN }}
           release_name: Release $tag
           body: |
             This is a release for version $tag
-          tag_name: $tag
+          tag_name: ${{ github.ref_name }}
           draft: false
           prerelease: false
