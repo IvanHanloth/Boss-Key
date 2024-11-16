@@ -54,7 +54,7 @@ jobs:
           output-dir: out
           windows-disable-console: true
           windows-icon-from-ico: icon.ico
-          windows-file-version: ${{ github.ref_name }}
+          windows-file-version: ${{ github.ref_name -replace 'refs/tags/v', '' }}
           windows-product-name: "Boss Key"
           windows-file-description: "Boss Key Application"
           windows-company-name: "Ivan Hanloth"
