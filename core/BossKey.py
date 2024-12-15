@@ -2,9 +2,10 @@ from core.config import Config,save_config
 from winreg import OpenKey,HKEY_CURRENT_USER,QueryValueEx,DeleteValue,CloseKey,KEY_ALL_ACCESS,SetValueEx,REG_SZ
 from win32gui import GetForegroundWindow, ShowWindow
 from win32con import SW_HIDE, SW_SHOW, WM_APP
+from win32api import SendMessage
+import win32api,win32con,win32gui
 import win32process
 import psutil
-from win32api import SendMessage
 from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
 import wx
 import wx.adv
@@ -12,6 +13,7 @@ from win11toast import notify
 import sys
 from pynput import keyboard, mouse
 import threading
+import time
 class SettingWindow(wx.Dialog):
     def __init__(self):
         wx.Dialog.__init__(self, None, title="Boss-Key")
@@ -65,6 +67,17 @@ class SettingWindow(wx.Dialog):
         hbox3.Add(self.CL_record_btn, proportion=1, flag=wx.EXPAND|wx.RIGHT, border=10)
         vbox.Add(hbox3, proportion=1, flag=wx.EXPAND|wx.BOTTOM, border=10)
 
+
+        #隐藏前发送热键（HS）
+        hbox8 = wx.BoxSizer(wx.HORIZONTAL)
+        HS_label = wx.StaticText(panel, label="隐藏前发送热键（beta）:")
+        self.HS_text = wx.TextCtrl(panel, -1, value=Config.hide_send_hotkey)
+        self.HS_record_btn = wx.Button(panel, -1, label="录制热键")
+        hbox8.Add(HS_label, proportion=1, flag=wx.LEFT, border=10)
+        hbox8.Add(self.HS_text, proportion=1, flag=wx.EXPAND|wx.LEFT, border=10)
+        hbox8.Add(self.HS_record_btn, proportion=1, flag=wx.EXPAND|wx.RIGHT, border=10)
+        vbox.Add(hbox8, proportion=1, flag=wx.EXPAND|wx.BOTTOM, border=10)
+
         # 设置提示1
         # hbox4 = wx.BoxSizer(wx.HORIZONTAL)
         # StaticText1=wx.StaticText(panel,label="录制时，所有热键将失效，保存后恢复")
@@ -103,18 +116,21 @@ class SettingWindow(wx.Dialog):
         self.SW_record_btn.Bind(wx.EVT_BUTTON, self.OnRecordSW)
         self.CS_record_btn.Bind(wx.EVT_BUTTON, self.OnRecordCS)
         self.CL_record_btn.Bind(wx.EVT_BUTTON, self.OnRecordCL)
+        self.HS_record_btn.Bind(wx.EVT_BUTTON, self.OnRecordHS)
         # self.Bind(wx.EVT_CLOSE,self.OnClose)
 
     def SetData(self):
         self.SW_text.SetValue(Config.hide_hotkey)
         self.CS_text.SetValue(Config.startup_hotkey)
         self.CL_text.SetValue(Config.close_hotkey)
+        self.HS_text.SetValue(Config.hide_send_hotkey)
         self.Mute_after_hide_checkbox.SetValue(bool(Config.mute_after_hide))
 
     def OnSave(self,e):
         Config.hide_hotkey = self.SW_text.GetValue()
         Config.startup_hotkey = self.CS_text.GetValue()
         Config.close_hotkey = self.CL_text.GetValue()
+        Config.hide_send_hotkey = self.HS_text.GetValue()
         Config.HotkeyWindow.reBind()
         Config.mute_after_hide = self.Mute_after_hide_checkbox.GetValue()
         save_config()
@@ -124,6 +140,7 @@ class SettingWindow(wx.Dialog):
         self.SW_text.SetValue("Ctrl+Q")
         self.CS_text.SetValue("Alt+Q")
         self.CL_text.SetValue("Win+Esc")
+        self.HS_text.SetValue("Space")
         wx.MessageDialog(None, u"已重置选项，请保存热键以启用", u"Boss_Key", wx.OK | wx.ICON_INFORMATION).ShowModal()
 
     def OnRecordSW(self, e):
@@ -134,6 +151,9 @@ class SettingWindow(wx.Dialog):
 
     def OnRecordCL(self, e):
         self.recordHotkey(self.CL_text)
+
+    def OnRecordHS(self, e):
+        self.recordHotkey(self.HS_text)
 
     def recordHotkey(self, text_ctrl):
         self.recording = True
@@ -307,6 +327,21 @@ class HotkeyWindow():
     def onHide(self,e=""):
         Config.hwnd_n = GetForegroundWindow()
         if Config.times == 1:
+            # 发送热键
+            # if Config.hide_send_hotkey:
+            #     print("send")
+            #     try:
+            #         keyboard.Controller().tap(keyboard.Key.space)
+            #     except Exception as e:
+            #         print(e)
+            #         pass
+            # time.sleep(0.25)
+            if Config.hide_send_hotkey:
+                
+                win32api.SendMessage(Config.hwnd_n, win32con.WM_KEYDOWN, win32con.VK_SPACE, 0)
+                time.sleep(2)
+                win32api.SendMessage(Config.hwnd_n, win32con.WM_KEYUP, win32con.VK_SPACE, 0)
+                time.sleep(2)
             # 隐藏窗口
             ShowWindow(Config.hwnd_n, SW_HIDE)
             if Config.mute_after_hide:
@@ -342,6 +377,7 @@ class HotkeyWindow():
                 print("mute")
                 volume.SetMute(flag, None)
                 break
+
     def onStartup(self,e=""):
         try:
             res = self.modifyStartup("Boss Key Application",file_path=Config.file_path)
@@ -353,6 +389,7 @@ class HotkeyWindow():
                 self.sendNotify(title="开机自启状态变化",message="Boss Key开机自启状态未知")
         except:
             self.sendNotify(title="程序运行出错",message=f"Boss Key程序运行出错，请尝试按下{Config.close_hotkey}重启程序")
+
     def onClose(self,e=""):
         self.sendNotify("Boss Key已停止服务", "Boss Key已成功退出")
         if Config.times == 0:
@@ -362,9 +399,12 @@ class HotkeyWindow():
             
         if self.listener:
             self.listener.stop()
-        Config.TaskBarIcon.Destroy()
-        Config.SettingWindow.Destroy()
-        sys.exit(0)
+        try:
+            Config.TaskBarIcon.Destroy()
+            Config.SettingWindow.Destroy()
+        except:
+            sys.exit(0)
+
     def modifyStartup(self,name: str, file_path: str):
         key = OpenKey(HKEY_CURRENT_USER, "Software\Microsoft\Windows\CurrentVersion\Run", 0, KEY_ALL_ACCESS)
         try:

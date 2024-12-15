@@ -13,6 +13,7 @@ class Config:
     hide_hotkey = "Ctrl+Q"
     startup_hotkey = "Alt+Q"
     close_hotkey = "Win+Esc"
+    hide_send_hotkey = "Space"
 
     mute_after_hide = True
     
@@ -57,11 +58,13 @@ def load_config():
     except:
         pass
     save_config()
+    
     if not old_version: 
         # 没有使用老版本
         Config.hide_hotkey = config.get("hotkey", "hide_hotkey", fallback="Ctrl+Q")
         Config.startup_hotkey = config.get("hotkey", "startup_hotkey", fallback="Alt+Q")
         Config.close_hotkey = config.get("hotkey", "close_hotkey", fallback="Win+Esc")
+        Config.hide_send_hotkey = config.get("hotkey", "hide_send_hotkey", fallback="Space")
 
 def save_config():
     config = RawConfigParser()
@@ -73,6 +76,7 @@ def save_config():
     config['hotkey']['hide_hotkey'] = Config.hide_hotkey
     config['hotkey']['startup_hotkey'] = Config.startup_hotkey
     config['hotkey']['close_hotkey'] = Config.close_hotkey
+    config['hotkey']['hide_send_hotkey'] = Config.hide_send_hotkey
 
     config.add_section("setting")
     config['setting']['mute_after_hide']=str(Config.mute_after_hide)
