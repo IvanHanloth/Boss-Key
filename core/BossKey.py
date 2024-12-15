@@ -326,16 +326,13 @@ class HotkeyWindow():
 
     def onHide(self,e=""):
         Config.hwnd_n = GetForegroundWindow()
-        win32api.SendMessage(Config.hwnd_n, win32con.WM_ACTIVATE, win32con.WA_ACTIVE, 0)
         if Config.times == 1:
             # 发送热键
             if Config.hide_send_hotkey:
                 print("send")
                 try:
-                    time.sleep(0.3)
-                    keyboard.Controller().press(keyboard.Key.space)
-                    # time.sleep(1)
-                    keyboard.Controller().release(keyboard.Key.space)
+                    time.sleep(0.25)
+                    keyboard.Controller().tap(keyboard.Key.space)
                 except Exception as e:
                     print(e)
             # if Config.hide_send_hotkey:
