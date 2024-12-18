@@ -18,9 +18,9 @@ class Config:
     hide_hotkey = "Ctrl+Q"
     startup_hotkey = "Alt+Q"
     close_hotkey = "Win+Esc"
-    hide_send_hotkey = "Space"
 
     mute_after_hide = True
+    send_before_hide = False
     
     ini_path = os.path.join(os.getcwd(), "config.ini")
     icon=io.BytesIO(get_icon())
@@ -53,7 +53,15 @@ class Config:
             Config.first_start=True
             Config.save()
 
+        try:
+            Config.send_before_hide=config.getboolean("setting","send_before_hide")
+        except:
+            Config.send_before_hide=False
+            Config.first_start=True
+            Config.save()
+
         old_version=False
+        
         try:
             Config.hide_hotkey = config.get("hotkey", "hide_f") +config.get("hotkey", "hide_v") 
             Config.startup_hotkey = config.get("hotkey", "startup_f") +config.get("hotkey", "startup_v")
@@ -69,6 +77,7 @@ class Config:
             Config.hide_hotkey = config.get("hotkey", "hide_hotkey", fallback="Ctrl+Q")
             Config.startup_hotkey = config.get("hotkey", "startup_hotkey", fallback="Alt+Q")
             Config.close_hotkey = config.get("hotkey", "close_hotkey", fallback="Win+Esc")
+            
 
     @staticmethod
     def save():
@@ -85,7 +94,8 @@ class Config:
         }
 
         config['setting']={
-            'mute_after_hide':str(Config.mute_after_hide)
+            'mute_after_hide':str(Config.mute_after_hide),
+            'send_before_hide':str(Config.send_before_hide)
         }
 
         with open(Config.ini_path, 'w', encoding='utf-8') as configfile:

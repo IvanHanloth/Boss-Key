@@ -65,8 +65,14 @@ class SettingWindow(wx.Dialog):
         hbox7 = wx.BoxSizer(wx.HORIZONTAL)
         Mute_after_hide_label = wx.StaticText(panel, label="隐藏窗口后静音")
         self.Mute_after_hide_checkbox = wx.CheckBox(panel, -1, "")
+        SendBeforeHideLabel = wx.StaticText(panel, label="隐藏前发送空格（Beta）")
+        SBHTip=wx.ToolTip("隐藏窗口前发送空格，用于关闭弹出的输入框等，隐藏窗口会存在一定的延迟")
+        SendBeforeHideLabel.SetToolTip(SBHTip)
+        self.SendBeforeHideCheckbox = wx.CheckBox(panel, -1, "")
         hbox7.Add(Mute_after_hide_label, proportion=1, flag=wx.LEFT, border=10)
         hbox7.Add(self.Mute_after_hide_checkbox, proportion=1, flag=wx.LEFT, border=10)
+        hbox7.Add(SendBeforeHideLabel, proportion=1, flag=wx.LEFT, border=10)
+        hbox7.Add(self.SendBeforeHideCheckbox, proportion=1, flag=wx.LEFT, border=10)
         vbox.Add(hbox7, proportion=1, flag=wx.BOTTOM, border=10)
 
         # 创建按钮
@@ -85,6 +91,7 @@ class SettingWindow(wx.Dialog):
         self.SW_record_btn.Bind(wx.EVT_BUTTON, self.OnRecordSW)
         self.CS_record_btn.Bind(wx.EVT_BUTTON, self.OnRecordCS)
         self.CL_record_btn.Bind(wx.EVT_BUTTON, self.OnRecordCL)
+        self.SendBeforeHideCheckbox.Bind(wx.EVT_CHECKBOX, self.OnSendBeforeHide)
         # self.Bind(wx.EVT_CLOSE,self.OnClose)
 
     def SetData(self):
@@ -93,6 +100,7 @@ class SettingWindow(wx.Dialog):
         self.CS_text.SetValue(Config.startup_hotkey)
         self.CL_text.SetValue(Config.close_hotkey)
         self.Mute_after_hide_checkbox.SetValue(bool(Config.mute_after_hide))
+        self.SendBeforeHideCheckbox.SetValue(bool(Config.send_before_hide))
 
     def OnSave(self,e):
         Config.hide_hotkey = self.SW_text.GetValue()
@@ -100,6 +108,7 @@ class SettingWindow(wx.Dialog):
         Config.close_hotkey = self.CL_text.GetValue()
         Config.HotkeyWindow.reBind()
         Config.mute_after_hide = self.Mute_after_hide_checkbox.GetValue()
+        Config.send_before_hide = self.SendBeforeHideCheckbox.GetValue()
         Config.save()
         wx.MessageDialog(None, u"保存成功", u"Boss_Key", wx.OK | wx.ICON_INFORMATION).ShowModal()
 
@@ -108,6 +117,10 @@ class SettingWindow(wx.Dialog):
         self.CS_text.SetValue("Alt+Q")
         self.CL_text.SetValue("Win+Esc")
         wx.MessageDialog(None, u"已重置选项，请保存热键以启用", u"Boss Key", wx.OK | wx.ICON_INFORMATION).ShowModal()
+
+    def OnSendBeforeHide(self,e):
+        if self.SendBeforeHideCheckbox.GetValue():
+            wx.MessageDialog(None, u"隐藏窗口前向被隐藏的窗口发送空格，用于暂停视频等。启用此功能可能会延迟窗口的隐藏", u"Boss Key", wx.OK | wx.ICON_INFORMATION).ShowModal()
 
     def OnRecordSW(self, e):
         self.recordHotkey(self.SW_text)

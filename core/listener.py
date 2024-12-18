@@ -4,6 +4,7 @@ from win32gui import GetForegroundWindow, ShowWindow
 from win32con import SW_HIDE, SW_SHOW
 import sys
 from pynput import keyboard
+import time
 
 class HotkeyListener():
     def __init__(self):
@@ -40,6 +41,11 @@ class HotkeyListener():
         Config.hwnd_n = GetForegroundWindow()
         if Config.times == 1:
             # 隐藏窗口
+            print(Config.send_before_hide)
+            if Config.send_before_hide:
+                time.sleep(0.3)
+                keyboard.Controller().tap(keyboard.Key.space)
+                
             ShowWindow(Config.hwnd_n, SW_HIDE)
             if Config.mute_after_hide:
                 tool.changeMute(Config.hwnd_n,1)
