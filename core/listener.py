@@ -29,7 +29,7 @@ class HotkeyListener():
         self.hotkeys = {
             Config.hide_hotkey: self.onHide,
             Config.startup_hotkey: self.onStartup,
-            Config.close_hotkey: self.onClose
+            Config.close_hotkey: self.Close
         }
         self.hotkeys = tool.keyConvert(self.hotkeys)
         print(self.hotkeys)
@@ -58,10 +58,10 @@ class HotkeyListener():
     def onStartup(self,e=""):
         tool.sendNotify(
             title="嗨！你好！",
-            message="也许你还在习惯于使用快捷键来切换开机启动，但是这个功能已经被移除了。\n现在你可以在托盘菜单中直接切换开机启动状态，希望你喜欢！"
+            message="也许你还在习惯于使用快捷键来切换开机启动，但是这个功能已经被移除了。\n现在你可以在托盘菜单中直接切换开机启动状态，希望你喜欢！\n此提示将在下个版本完全移除"
         )
 
-    def onClose(self,e=""):
+    def Close(self,e=""):
         tool.sendNotify("Boss Key已停止服务", "Boss Key已成功退出")
         if Config.times == 0:
             ShowWindow(Config.hwnd_b, SW_SHOW)

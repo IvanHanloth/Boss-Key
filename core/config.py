@@ -5,6 +5,11 @@ from configparser import ConfigParser
 import io
 
 class Config:
+    AppVersion = "1.4.3.0"
+    AppReleaseDate = "2024-12-19"
+    AppAuthor = "IvanHanloth"
+    AppCopyRight = "Copyright © 2024 Ivan Hanloth All Rights Reserved."
+
     hwnd=0
     hwnd_b = ""
     hwnd_n = ''

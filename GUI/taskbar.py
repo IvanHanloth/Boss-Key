@@ -1,6 +1,7 @@
 import wx, wx.adv
 from core.config import Config
 import core.tools as tool
+from GUI import about
 import sys
 
 class TaskBarIcon(wx.adv.TaskBarIcon):
@@ -17,15 +18,16 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
     def BindEVT(self):
         # 绑定菜单项事件
         self.Bind(wx.EVT_MENU, self.onSetting, id=self.MENU_SETTING)
-        self.Bind(wx.EVT_MENU, self.onExit, id=self.MENU_EXIT)
         self.Bind(wx.EVT_MENU, self.onStartup, id=self.MENU_STARTUP)
+        self.Bind(wx.EVT_MENU, self.onExit, id=self.MENU_EXIT)
+        self.Bind(wx.EVT_MENU, self.onAbout, id=wx.ID_ABOUT)
 
     def CreatePopupMenu(self):
         menu = wx.Menu()
         menu.Append(self.MENU_SETTING, '设置')
         menu.Append(self.MENU_STARTUP, '开机自启', kind=wx.ITEM_CHECK)
         menu.Check(self.MENU_STARTUP, tool.checkStartup("Boss Key Application",Config.file_path))
-        # menu.Append(wx.ID_ABOUT, '关于')
+        menu.Append(wx.ID_ABOUT, '关于')
         menu.AppendSeparator()
         menu.Append(self.MENU_EXIT, '退出')
         return menu
@@ -45,6 +47,9 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
     def onSetting(self,e):
         Config.SettingWindow.Show()
 
+    def onAbout(self,e):
+        about.AboutWindow().Show()
+
     def onExit(self,e):
-        Config.HotkeyWindow.onClose()
+        Config.HotkeyWindow.Close()
         sys.exit(0)
