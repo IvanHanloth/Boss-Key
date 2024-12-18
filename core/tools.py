@@ -4,6 +4,7 @@ from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
 from core.config import Config
 import win32process
 import psutil
+import core.vkMap as vkMap
 
 def modifyStartup(name: str, file_path: str):
     key = OpenKey(HKEY_CURRENT_USER, "Software\Microsoft\Windows\CurrentVersion\Run", 0, KEY_ALL_ACCESS)
@@ -65,29 +66,14 @@ def keyMux(key):
     """
     按键多合一
     """
-    if hasattr(key, 'char') and key.char is not None:
-        return key.char.upper()
-    elif hasattr(key, 'name') and key.name is not None:
-        key_name = key.name.lower()
-        if key_name in ('ctrl_l', 'ctrl_r'):
-            return 'Ctrl'
-        elif key_name in ('alt_l', 'alt_r', 'alt_gr'):
-            return 'Alt'
-        elif key_name in ('shift_l', 'shift_r'):
-            return 'Shift'
-        elif key_name == 'esc':
-            return 'Esc'
-        elif key_name == 'enter':
-            return 'Enter'
-        elif key_name == 'cmd':
-            return 'Win'
-        elif key_name == 'button.middle':
-            return 'MIDDLE'
-        else:
-            return key.name.upper()
-    else:
-        return str(key).upper()
     
+    key_name = key.name.lower()
+    for n,v in vkMap.ScanName2VKName.items():
+        if key_name == n.lower():
+            return v
+        
+    return key_name.upper()
+
 def keyConvert(hotkeys: dict):
     """
     按键解析
