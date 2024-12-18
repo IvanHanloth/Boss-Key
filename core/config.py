@@ -18,6 +18,7 @@ class Config:
     hide_hotkey = "Ctrl+Q"
     startup_hotkey = "Alt+Q"
     close_hotkey = "Win+Esc"
+    hide_send_hotkey = "Space"
 
     mute_after_hide = True
     
