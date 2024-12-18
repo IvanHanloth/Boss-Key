@@ -1,1 +1,1 @@
-python -m nuitka --windows-disable-console --onefile --standalone --follow-import-to=core --windows-icon-from-ico=icon.ico --windows-file-version=1.4.2.7 --windows-product-name="Boss Key" --windows-file-description="Boss Key Application" --include-data-file=icon.ico=. --windows-company-name="Ivan Hanloth" --show-progress --mingw64 --copyright="Copyright (C) 2024 Ivan Hanloth All Rights Reserved. " --quiet --output-dir=out Boss-Key.py
+nuitka --windows-file-version=$tag --show-progress --mingw64 --quiet --assume-yes-for-downloads --output-dir=out Boss-Key.py
