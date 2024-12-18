@@ -9,7 +9,8 @@
 # nuitka-project: --copyright="Copyright (C) 2024 Ivan Hanloth All Rights Reserved. "
 # nuitka-project: --windows-company-name="Ivan Hanloth"
 
-from core import BossKey
+from GUI import setting, taskbar
+from core import listener
 import sys
 import ctypes
 import os
@@ -51,9 +52,9 @@ if is_already_running(sys.argv[0][:-4]+".lock"):
     sys.exit(0)
 else:
     app = wx.App()
-    Config.HotkeyWindow=BossKey.HotkeyWindow()
-    Config.SettingWindow=BossKey.SettingWindow()
-    Config.TaskBarIcon=BossKey.TaskBarIcon()
+    Config.HotkeyWindow=listener.HotkeyListener()
+    Config.SettingWindow=setting.SettingWindow()
+    Config.TaskBarIcon=taskbar.TaskBarIcon()
     if Config.first_start:
         Config.SettingWindow.Show()
     app.MainLoop()
