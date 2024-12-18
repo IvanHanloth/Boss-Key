@@ -1,3 +1,14 @@
+# nuitka-project: --onefile
+# nuitka-project: --windows-disable-console
+# nuitka-project: --standalone
+# nuitka-project: --follow-import-to=core
+# nuitka-project: --windows-icon-from-ico=icon.ico
+# nuitka-project: --include-data-file=icon.ico=.
+# nuitka-project: --windows-product-name="Boss Key"
+# nuitka-project: --windows-file-description="Boss Key Application"
+# nuitka-project: --copyright="Copyright (C) 2024 Ivan Hanloth All Rights Reserved. "
+# nuitka-project: --windows-company-name="Ivan Hanloth"
+
 from core import BossKey
 import sys
 import ctypes
@@ -6,8 +17,8 @@ import psutil
 import wx
 from core.config import Config
 
-errorCode = ctypes.windll.shcore.SetProcessDpiAwareness(2) # Win10 and Win8
-success = ctypes.windll.user32.SetProcessDPIAware() #Win7 and below
+ctypes.windll.shcore.SetProcessDpiAwareness(2) # Win10 and Win8
+ctypes.windll.user32.SetProcessDPIAware() #Win7 and below
 def windows_message_box(title, message):
     ctypes.windll.user32.MessageBoxW(0, message, title, 0x40 | 0x1)
 
