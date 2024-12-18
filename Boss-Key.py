@@ -25,6 +25,7 @@ def windows_message_box(title, message):
 def write_pid(name):
     with open(name, "w") as f:
         f.write(str(psutil.Process().pid))
+        
 def is_already_running(name):
     if os.path.exists(name):
         with open(name, "r") as f:
