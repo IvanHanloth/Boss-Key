@@ -43,8 +43,8 @@ class HotkeyListener():
             # 隐藏窗口
             print(Config.send_before_hide)
             if Config.send_before_hide:
-                time.sleep(0.3)
-                keyboard.Controller().tap(keyboard.Key.space)
+                time.sleep(0.2)
+                keyboard.Controller().tap(keyboard.KeyCode.from_vk(0xB2))
                 
             ShowWindow(Config.hwnd_n, SW_HIDE)
             if Config.mute_after_hide:
