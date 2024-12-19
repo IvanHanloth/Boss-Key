@@ -2,7 +2,6 @@ import wx
 from core.config import Config
 from core.tools import keyMux
 import keyboard
-import queue
 
 class RecordedHotkey:
     keys_recorded = set()
@@ -41,7 +40,7 @@ class RecordWindow(wx.Dialog):
         # 创建一个静态文本，居中对齐
         hbox1 = wx.BoxSizer(wx.HORIZONTAL)
         self.text = wx.StaticText(panel, label="正在录制热键",style=wx.ALIGN_CENTER)
-        self.text.SetFont(wx.Font(16, wx.SWISS, wx.NORMAL, wx.BOLD))
+        self.text.SetFont(wx.Font(16, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD))
         self.text.SetSize(self.text.GetBestSize())
         hbox1.Add(self.text, proportion=1, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=20)
         vbox.Add(hbox1, proportion=1, flag=wx.EXPAND|wx.TOP|wx.BOTTOM, border=20)
@@ -49,7 +48,7 @@ class RecordWindow(wx.Dialog):
         # 创建一个静态文本，居中对齐，字号变大，加粗
         hbox2 = wx.BoxSizer(wx.HORIZONTAL)
         self.text2 = wx.StaticText(panel,style=wx.ALIGN_CENTER, label="请按下热键")
-        self.text2.SetFont(wx.Font(22, wx.SWISS, wx.NORMAL, wx.BOLD))
+        self.text2.SetFont(wx.Font(22, wx.FONTFAMILY_SCRIPT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD))
         self.text2.SetSize(self.text2.GetBestSize())
         hbox2.Add(self.text2, proportion=1, flag=wx.LEFT|wx.RIGHT, border=20)
         vbox.Add(hbox2, proportion=1, flag=wx.EXPAND|wx.TOP|wx.BOTTOM, border=20)
