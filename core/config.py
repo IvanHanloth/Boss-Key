@@ -24,7 +24,7 @@ class Config:
     
     ini_path = os.path.join(os.getcwd(), "config.ini")
     icon=io.BytesIO(get_icon())
-    icon_info=os.path.join(os.path.dirname(sys.argv[0]),"icon.ico")
+    icon_info=os.path.join(os.path.dirname(os.path.dirname(__file__)),"icon.ico")
     file_path=sys.argv[0]
     # 判断是否为首次启动
     first_start = not os.path.exists(ini_path)
