@@ -2,6 +2,7 @@ import wx
 from core.config import Config
 import core.tools as tool
 import keyboard
+import GUI.record as record
 
 class SettingWindow(wx.Dialog):
     def __init__(self):
@@ -78,7 +79,7 @@ class SettingWindow(wx.Dialog):
         # 创建按钮
         hbox5 = wx.BoxSizer(wx.HORIZONTAL)
         self.Reset_btn = wx.Button(panel,size=(100,60), label="重置热键")
-        self.Save_btn = wx.Button(panel,size=(100,60), label="保存热键")
+        self.Save_btn = wx.Button(panel,size=(100,60), label="保存设置")
         hbox5.Add(self.Reset_btn, proportion=1, flag=wx.LEFT, border=20)
         hbox5.Add(self.Save_btn, proportion=1, flag=wx.RIGHT, border=20)
         vbox.Add(hbox5, proportion=1, flag=wx.EXPAND|wx.BOTTOM, border=10)
@@ -120,7 +121,7 @@ class SettingWindow(wx.Dialog):
         self.SW_text.SetValue("Ctrl+Q")
         self.CS_text.SetValue("Alt+Q")
         self.CL_text.SetValue("Win+Esc")
-        wx.MessageDialog(None, u"已重置选项，请保存热键以启用", u"Boss Key", wx.OK | wx.ICON_INFORMATION).ShowModal()
+        wx.MessageDialog(None, u"已重置选项，请保存设置以启用", u"Boss Key", wx.OK | wx.ICON_INFORMATION).ShowModal()
 
     def OnSendBeforeHide(self,e):
         if self.SendBeforeHideCheckbox.GetValue():
@@ -140,35 +141,14 @@ class SettingWindow(wx.Dialog):
             Config.HotkeyWindow.stop()
         except:
             pass
-        self.recording = True
-        self.keys_recorded = set()
-        self.keys_pressing = set()
-        text_ctrl.SetValue("请按下热键组合...")
-        # btn.Disable()
+        btn.Disable()
         btn.SetLabel("录制中...")
+        record.RecordedHotkey.confirm=False
+        RecordWindow = record.RecordWindow()
+        RecordWindow.ShowModal()
+        btn.Enable()
+        btn.SetLabel("录制热键")
+        if record.RecordedHotkey.confirm:
+            text_ctrl.SetValue(record.RecordedHotkey.final_key)
 
-        btn.SetFocus()
-        keyboard.hook(self.onKeyEvent)
-        self.__text_ctrl = text_ctrl
-        self.__btn = btn
 
-    def onKeyEvent(self, event):
-        key=tool.keyMux(event)
-        if event.event_type == 'down':
-            if len(self.keys_pressing)==0:
-                self.keys_recorded.clear()
-            self.keys_pressing.add(key)
-            self.keys_recorded.add(key)
-        elif event.event_type == 'up':
-            self.keys_pressing.discard(key)
-            if not self.keys_pressing:
-                self.stopRecording()
-        self.__text_ctrl.SetValue("+".join(self.keys_recorded))
-
-    def stopRecording(self):
-        keyboard.unhook_all()
-        self.recording = False
-        hotkey_str = "+".join(sorted(self.keys_recorded))
-        self.__text_ctrl.SetValue(hotkey_str)
-        # self.__btn.Enable()
-        self.__btn.SetLabel("录制热键")
