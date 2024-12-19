@@ -1,7 +1,5 @@
 import wx
 from core.config import Config
-import core.tools as tool
-import keyboard
 import GUI.record as record
 
 class SettingWindow(wx.Dialog):
