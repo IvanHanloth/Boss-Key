@@ -9,3 +9,4 @@ win11toast==0.35
 winsdk==1.0.0b10
 wxPython==4.2.2
 nuitka==2.2
+keyboard==0.13.5
