@@ -17,7 +17,6 @@ class Config:
     times=1
 
     hide_hotkey = "Ctrl+Q"
-    startup_hotkey = "Alt+Q"
     close_hotkey = "Win+Esc"
 
     mute_after_hide = True
@@ -54,7 +53,6 @@ class Config:
         Config.mute_after_hide = config.get("setting", {}).get("mute_after_hide", True)
         Config.send_before_hide = config.get("setting", {}).get("send_before_hide", False)
         Config.hide_hotkey = config.get("hotkey", {}).get("hide_hotkey", "Ctrl+Q")
-        Config.startup_hotkey = config.get("hotkey", {}).get("startup_hotkey", "Alt+Q")
         Config.close_hotkey = config.get("hotkey", {}).get("close_hotkey", "Win+Esc")
 
         if config.get('version', '') != Config.AppVersion:
@@ -70,7 +68,6 @@ class Config:
             },
             'hotkey': {
                 'hide_hotkey': Config.hide_hotkey,
-                'startup_hotkey': Config.startup_hotkey,
                 'close_hotkey': Config.close_hotkey
             },
             'setting': {
@@ -93,7 +90,6 @@ class Config:
         Config.mute_after_hide = config.getboolean("setting", "mute_after_hide", fallback=True)
         Config.send_before_hide = config.getboolean("setting", "send_before_hide", fallback=False)
         Config.hide_hotkey = config.get("hotkey", "hide_hotkey", fallback="Ctrl+Q")
-        Config.startup_hotkey = config.get("hotkey", "startup_hotkey", fallback="Alt+Q")
         Config.close_hotkey = config.get("hotkey", "close_hotkey", fallback="Win+Esc")
         Config.save()
         os.remove(configpath)
