@@ -1,6 +1,7 @@
 .venv/
 *.pyc
 config.ini
+config.json
 user.ini
 *.lock
 out/
