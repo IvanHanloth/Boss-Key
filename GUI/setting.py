@@ -134,7 +134,7 @@ class SettingWindow(wx.Dialog):
     def OnRecordCL(self, e):
         self.recordHotkey(self.CL_text, self.CL_record_btn)
 
-    def recordHotkey(self, text_ctrl, btn):
+    def recordHotkey(self, text_ctrl:wx.TextCtrl, btn:wx.Button):
         try:
             Config.HotkeyWindow.stop()
         except:
