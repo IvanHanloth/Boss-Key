@@ -34,14 +34,14 @@ class SettingWindow(wx.Dialog):
         vbox.Add(hbox1, proportion=1, flag=wx.EXPAND|wx.TOP|wx.BOTTOM, border=10)
         
         #设置自启动热键（CS)
-        hbox2 = wx.BoxSizer(wx.HORIZONTAL)
-        CS_label = wx.StaticText(panel, label="修改自启动热键:")
-        self.CS_text = wx.TextCtrl(panel, -1, value=Config.startup_hotkey)
-        self.CS_record_btn = wx.Button(panel, -1, label="录制热键")
-        hbox2.Add(CS_label, proportion=1, flag=wx.LEFT, border=10)
-        hbox2.Add(self.CS_text, proportion=1, flag=wx.EXPAND|wx.LEFT, border=10)
-        hbox2.Add(self.CS_record_btn, proportion=1, flag=wx.EXPAND|wx.RIGHT, border=10)
-        vbox.Add(hbox2, proportion=1, flag=wx.EXPAND|wx.BOTTOM, border=10)
+        # hbox2 = wx.BoxSizer(wx.HORIZONTAL)
+        # CS_label = wx.StaticText(panel, label="修改自启动热键:")
+        # self.CS_text = wx.TextCtrl(panel, -1, value=Config.startup_hotkey)
+        # self.CS_record_btn = wx.Button(panel, -1, label="录制热键")
+        # hbox2.Add(CS_label, proportion=1, flag=wx.LEFT, border=10)
+        # hbox2.Add(self.CS_text, proportion=1, flag=wx.EXPAND|wx.LEFT, border=10)
+        # hbox2.Add(self.CS_record_btn, proportion=1, flag=wx.EXPAND|wx.RIGHT, border=10)
+        # vbox.Add(hbox2, proportion=1, flag=wx.EXPAND|wx.BOTTOM, border=10)
         
         #设置关闭热键（CL）
         hbox3 = wx.BoxSizer(wx.HORIZONTAL)
@@ -88,7 +88,7 @@ class SettingWindow(wx.Dialog):
         self.Save_btn.Bind(wx.EVT_BUTTON, self.OnSave)
         self.Reset_btn.Bind(wx.EVT_BUTTON,self.OnReset)
         self.SW_record_btn.Bind(wx.EVT_BUTTON, self.OnRecordSW)
-        self.CS_record_btn.Bind(wx.EVT_BUTTON, self.OnRecordCS)
+        # self.CS_record_btn.Bind(wx.EVT_BUTTON, self.OnRecordCS)
         self.CL_record_btn.Bind(wx.EVT_BUTTON, self.OnRecordCL)
         self.SendBeforeHideCheckbox.Bind(wx.EVT_CHECKBOX, self.OnSendBeforeHide)
         # self.Bind(wx.EVT_CLOSE,self.OnClose)
@@ -96,14 +96,14 @@ class SettingWindow(wx.Dialog):
     def SetData(self):
         Config.load()
         self.SW_text.SetValue(Config.hide_hotkey)
-        self.CS_text.SetValue(Config.startup_hotkey)
+        # self.CS_text.SetValue(Config.startup_hotkey)
         self.CL_text.SetValue(Config.close_hotkey)
         self.Mute_after_hide_checkbox.SetValue(bool(Config.mute_after_hide))
         self.SendBeforeHideCheckbox.SetValue(bool(Config.send_before_hide))
 
     def OnSave(self,e):
         Config.hide_hotkey = self.SW_text.GetValue()
-        Config.startup_hotkey = self.CS_text.GetValue()
+        # Config.startup_hotkey = self.CS_text.GetValue()
         Config.close_hotkey = self.CL_text.GetValue()
         Config.mute_after_hide = self.Mute_after_hide_checkbox.GetValue()
         Config.send_before_hide = self.SendBeforeHideCheckbox.GetValue()
@@ -117,7 +117,7 @@ class SettingWindow(wx.Dialog):
 
     def OnReset(self,e):
         self.SW_text.SetValue("Ctrl+Q")
-        self.CS_text.SetValue("Alt+Q")
+        # self.CS_text.SetValue("Alt+Q")
         self.CL_text.SetValue("Win+Esc")
         wx.MessageDialog(None, u"已重置选项，请保存设置以启用", u"Boss Key", wx.OK | wx.ICON_INFORMATION).ShowModal()
 
@@ -128,13 +128,13 @@ class SettingWindow(wx.Dialog):
     def OnRecordSW(self, e):
         self.recordHotkey(self.SW_text, self.SW_record_btn)
 
-    def OnRecordCS(self, e):
-        self.recordHotkey(self.CS_text, self.CS_record_btn)
+    # def OnRecordCS(self, e):
+    #     self.recordHotkey(self.CS_text, self.CS_record_btn)
 
     def OnRecordCL(self, e):
         self.recordHotkey(self.CL_text, self.CL_record_btn)
 
-    def recordHotkey(self, text_ctrl, btn):
+    def recordHotkey(self, text_ctrl:wx.TextCtrl, btn:wx.Button):
         try:
             Config.HotkeyWindow.stop()
         except:
