@@ -69,9 +69,9 @@ class SettingWindow(wx.Dialog):
         self.hide_show_hotkey_text = wx.TextCtrl(panel, -1, value=Config.hide_hotkey)
         self.hide_show_hotkey_btn = wx.Button(panel, -1, label="录制热键")
         hide_show_hotkey_sizer.Add(hide_show_hotkey_label, proportion=1, flag=wx.EXPAND| wx.ALL, border=10)
-        hide_show_hotkey_sizer.Add(self.hide_show_hotkey_text, proportion=2, flag=wx.EXPAND| wx.ALL, border=10)
+        hide_show_hotkey_sizer.Add(self.hide_show_hotkey_text, proportion=1, flag=wx.EXPAND| wx.ALL, border=10)
         hide_show_hotkey_sizer.Add(self.hide_show_hotkey_btn, proportion=1, flag=wx.EXPAND|wx.ALL, border=10)
-        hotkey_sizer.Add(hide_show_hotkey_sizer, proportion=4, flag=wx.EXPAND|wx.ALL, border=10)
+        hotkey_sizer.Add(hide_show_hotkey_sizer, proportion=1, flag=wx.EXPAND|wx.ALL, border=10)
         
         #设置关闭热键
         close_hotkey_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -79,9 +79,9 @@ class SettingWindow(wx.Dialog):
         self.close_hotkey_text = wx.TextCtrl(panel, -1, value=Config.close_hotkey)
         self.close_hotkey_btn = wx.Button(panel, -1, label="录制热键")
         close_hotkey_sizer.Add(close_hotkey_label, proportion=1, flag=wx.EXPAND| wx.ALL, border=10)
-        close_hotkey_sizer.Add(self.close_hotkey_text, proportion=2, flag=wx.EXPAND| wx.ALL, border=10)
+        close_hotkey_sizer.Add(self.close_hotkey_text, proportion=1, flag=wx.EXPAND| wx.ALL, border=10)
         close_hotkey_sizer.Add(self.close_hotkey_btn, proportion=1, flag=wx.EXPAND| wx.ALL, border=10)
-        hotkey_sizer.Add(close_hotkey_sizer, proportion=4, flag=wx.EXPAND| wx.ALL, border=10)
+        hotkey_sizer.Add(close_hotkey_sizer, proportion=1, flag=wx.EXPAND| wx.ALL, border=10)
         
         bottom_sizer.Add(hotkey_sizer,proportion=1, flag=wx.EXPAND| wx.ALL)
 
