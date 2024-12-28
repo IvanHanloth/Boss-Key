@@ -60,9 +60,9 @@ class APP(wx.App):
 
 if __name__ == '__main__':
     app = APP()
+    Config.TaskBarIcon=taskbar.TaskBarIcon()
     Config.HotkeyWindow=listener.HotkeyListener()
     Config.SettingWindow=setting.SettingWindow()
-    Config.TaskBarIcon=taskbar.TaskBarIcon()
     if Config.first_start:
         Config.SettingWindow.Show()
     app.MainLoop()

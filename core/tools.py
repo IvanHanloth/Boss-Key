@@ -62,6 +62,7 @@ def changeMute(hwnd,flag=1):
 def sendNotify(title,message):
     notify = wx.adv.NotificationMessage(title=title,message=message,parent=None)
     notify.SetIcon(wx.Icon(wx.Image(Config.icon).ConvertToBitmap()))
+    notify.UseTaskBarIcon(Config.TaskBarIcon)
     notify.Show(timeout=3) # 1 for short timeout, 100 for long timeout
 
 def keyMux(key):
