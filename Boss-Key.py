@@ -20,12 +20,7 @@ from core.config import Config
 
 ctypes.windll.shcore.SetProcessDpiAwareness(2) # Win10 and Win8
 ctypes.windll.user32.SetProcessDPIAware() #Win7 and below
-def windows_message_box(title, message):
-    ctypes.windll.user32.MessageBoxW(0, message, title, 0x40 | 0x1)
 
-def write_pid(name):
-    with open(name, "w") as f:
-        f.write(str(psutil.Process().pid))
 class APP(wx.App):
     def __init__(self):
         wx.App.__init__(self)
@@ -35,31 +30,35 @@ class APP(wx.App):
         self.SetAppName(Config.AppName)
         self.SetAppDisplayName(Config.AppName)
         self.SetVendorName(Config.AppAuthor)
+        if self.is_already_running(sys.argv[0][:-4]+".lock"):
+            wx.MessageBox( "Boss Key is already running","Boss Key", wx.OK | wx.ICON_INFORMATION)
+            sys.exit(0)
 
-def is_already_running(name):
-    if os.path.exists(name):
-        with open(name, "r") as f:
-            pid=f.read()
-        if pid == "":
-            write_pid(name)
-        else:
-            try:
-                process=psutil.Process(int(pid))
-                if process.is_running():
-                    return True
-                else:
-                    write_pid(name)
+    def write_pid(self,name):
+        with open(name, "w") as f:
+            f.write(str(psutil.Process().pid))
+
+    def is_already_running(self,name):
+        if os.path.exists(name):
+            with open(name, "r") as f:
+                pid=f.read()
+            if pid == "":
+                self.write_pid(name)
+            else:
+                try:
+                    process=psutil.Process(int(pid))
+                    if process.is_running():
+                        return True
+                    else:
+                        self.write_pid(name)
+                        return False
+                except:
+                    self.write_pid(name)
                     return False
-            except:
-                write_pid(name)
-                return False
-    else:
-        write_pid(name)
+        else:
+            self.write_pid(name)
 
-if is_already_running(sys.argv[0][:-4]+".lock"):
-    windows_message_box("Boss Key", "Boss Key is already running")
-    sys.exit(0)
-else:
+if __name__ == '__main__':
     app = APP()
     Config.HotkeyWindow=listener.HotkeyListener()
     Config.SettingWindow=setting.SettingWindow()
