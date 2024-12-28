@@ -26,7 +26,16 @@ def windows_message_box(title, message):
 def write_pid(name):
     with open(name, "w") as f:
         f.write(str(psutil.Process().pid))
+class APP(wx.App):
+    def __init__(self):
+        wx.App.__init__(self)
         
+        # 设置语言环境为中文
+        self.locale = wx.Locale(wx.LANGUAGE_CHINESE_SIMPLIFIED)
+        self.SetAppName(Config.AppName)
+        self.SetAppDisplayName(Config.AppName)
+        self.SetVendorName(Config.AppAuthor)
+
 def is_already_running(name):
     if os.path.exists(name):
         with open(name, "r") as f:
@@ -51,7 +60,7 @@ if is_already_running(sys.argv[0][:-4]+".lock"):
     windows_message_box("Boss Key", "Boss Key is already running")
     sys.exit(0)
 else:
-    app = wx.App()
+    app = APP()
     Config.HotkeyWindow=listener.HotkeyListener()
     Config.SettingWindow=setting.SettingWindow()
     Config.TaskBarIcon=taskbar.TaskBarIcon()
