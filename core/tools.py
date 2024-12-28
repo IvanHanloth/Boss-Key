@@ -1,5 +1,5 @@
 from winreg import OpenKey,HKEY_CURRENT_USER,QueryValueEx,DeleteValue,CloseKey,KEY_ALL_ACCESS,SetValueEx,REG_SZ
-from win11toast import notify
+import wx.adv
 from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
 from core.config import Config
 import win32process
@@ -60,7 +60,10 @@ def changeMute(hwnd,flag=1):
             break
 
 def sendNotify(title,message):
-    notify(title,message,icon=Config.icon_info,duration="short")
+    notify = wx.adv.NotificationMessage(title=title,message=message,parent=None)
+    notify.SetIcon(wx.Icon(wx.Image(Config.icon).ConvertToBitmap()))
+    notify.UseTaskBarIcon(Config.TaskBarIcon)
+    notify.Show(timeout=3) # 1 for short timeout, 100 for long timeout
 
 def keyMux(key):
     """
