@@ -3,9 +3,9 @@ from core.config import Config
 import GUI.record as record
 import wx.lib.buttons as buttons
 
-class SettingWindow(wx.Dialog):
+class SettingWindow(wx.Frame):
     def __init__(self):
-        wx.Dialog.__init__(self, None, title="设置 - Boss Key", style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+        super().__init__(None, title="设置 - Boss Key", style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
         self.SetIcon(wx.Icon(wx.Image(Config.icon).ConvertToBitmap()))
         
         self.init_UI()
@@ -29,11 +29,18 @@ class SettingWindow(wx.Dialog):
         left_staticbox = wx.StaticBox(panel, label="现有窗口进程")
         left_sizer = wx.StaticBoxSizer(left_staticbox, wx.VERTICAL)
         left_listctrl = wx.ListCtrl(panel, style=wx.LC_REPORT)
-        left_listctrl.InsertColumn(0, '选择', width=50)
-        left_listctrl.InsertColumn(1, '窗口标题', width=100)
-        left_listctrl.InsertColumn(2, '窗口句柄', width=100)
-        left_listctrl.InsertColumn(3, '启动进程', width=100)
+        left_listctrl.EnableCheckBoxes(True)
+        left_listctrl.InsertColumn(0, '窗口标题', width=100)
+        left_listctrl.InsertColumn(1, '窗口句柄', width=100)
+        left_listctrl.InsertColumn(2, '启动进程', width=100)
         left_sizer.Add(left_listctrl, 1, wx.EXPAND | wx.ALL, 5)
+
+        
+        index = left_listctrl.InsertItem(1, "啊啊")
+        left_listctrl.SetItem(index, 1, "tes1")
+        left_listctrl.SetItem(index, 2, "test2")
+        left_listctrl.SetItemData(index, 0)
+        
 
         # 中键按钮
         middle_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -46,7 +53,7 @@ class SettingWindow(wx.Dialog):
         right_staticbox = wx.StaticBox(panel, label="已绑定进程")
         right_sizer = wx.StaticBoxSizer(right_staticbox, wx.VERTICAL)
         right_listctrl = wx.ListCtrl(panel, style=wx.LC_REPORT)
-        right_listctrl.InsertColumn(0, '选择', width=50)
+        right_listctrl.EnableCheckBoxes(True)
         right_listctrl.InsertColumn(1, '窗口标题', width=100)
         right_listctrl.InsertColumn(2, '窗口句柄', width=100)
         right_listctrl.InsertColumn(3, '启动进程', width=100)
@@ -133,7 +140,7 @@ class SettingWindow(wx.Dialog):
         # self.CS_record_btn.Bind(wx.EVT_BUTTON, self.OnRecordCS)
         self.close_hotkey_btn.Bind(wx.EVT_BUTTON, self.OnRecordCL)
         self.send_before_hide_checkbox.Bind(wx.EVT_CHECKBOX, self.OnSendBeforeHide)
-        # self.Bind(wx.EVT_CLOSE,self.OnClose)
+        self.Bind(wx.EVT_CLOSE,self.OnClose)
 
     def SetData(self):
         Config.load()
@@ -170,8 +177,8 @@ class SettingWindow(wx.Dialog):
     def OnRecordSW(self, e):
         self.recordHotkey(self.hide_show_hotkey_text, self.hide_show_hotkey_btn)
 
-    # def OnRecordCS(self, e):
-    #     self.recordHotkey(self.CS_text, self.CS_record_btn)
+    def OnClose(self, e):
+        self.Hide()
 
     def OnRecordCL(self, e):
         self.recordHotkey(self.close_hotkey_text, self.close_hotkey_btn)

@@ -3,7 +3,7 @@ import sys
 import json
 from .icon import get_icon
 from configparser import ConfigParser
-import io
+from io import BytesIO
 
 class Config:
     AppName = "Boss Key"
@@ -48,8 +48,7 @@ SOFTWARE.
     send_before_hide = False
     
     config_path = os.path.join(os.getcwd(), "config.json")
-    icon=io.BytesIO(get_icon())
-    icon_info=os.path.join(os.path.dirname(os.path.dirname(__file__)),"icon.ico")
+    icon=BytesIO(get_icon())
     file_path=sys.argv[0]
     # 判断是否为首次启动
     first_start = not os.path.exists(config_path)
