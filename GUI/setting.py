@@ -1,5 +1,7 @@
 import wx
 from core.config import Config
+import win32gui,win32process
+import psutil
 import GUI.record as record
 import wx.lib.buttons as buttons
 
@@ -12,7 +14,7 @@ class SettingWindow(wx.Frame):
 
         self.Bind_EVT()
         self.SetData()
-        self.SetSize((1200, 600))
+        self.SetSize((1500, 700))
 
         self.Center()
 
@@ -28,36 +30,34 @@ class SettingWindow(wx.Frame):
         # 左边列表
         left_staticbox = wx.StaticBox(panel, label="现有窗口进程")
         left_sizer = wx.StaticBoxSizer(left_staticbox, wx.VERTICAL)
-        left_listctrl = wx.ListCtrl(panel, style=wx.LC_REPORT)
-        left_listctrl.EnableCheckBoxes(True)
-        left_listctrl.InsertColumn(0, '窗口标题', width=100)
-        left_listctrl.InsertColumn(1, '窗口句柄', width=100)
-        left_listctrl.InsertColumn(2, '启动进程', width=100)
-        left_sizer.Add(left_listctrl, 1, wx.EXPAND | wx.ALL, 5)
-
-        
-        index = left_listctrl.InsertItem(1, "啊啊")
-        left_listctrl.SetItem(index, 1, "tes1")
-        left_listctrl.SetItem(index, 2, "test2")
-        left_listctrl.SetItemData(index, 0)
+        self.left_listctrl = wx.ListCtrl(panel, style=wx.LC_REPORT)
+        self.left_listctrl.EnableCheckBoxes(True)
+        self.left_listctrl.InsertColumn(0, '窗口标题', width=150)
+        self.left_listctrl.InsertColumn(1, '窗口句柄', width=100)
+        self.left_listctrl.InsertColumn(2, '启动进程', width=150)
+        self.left_listctrl.InsertColumn(3, '进程PID', width=150)
+        left_sizer.Add(self.left_listctrl, 1, wx.EXPAND | wx.ALL, 5)
         
 
         # 中键按钮
         middle_sizer = wx.BoxSizer(wx.VERTICAL)
-        button1 = buttons.GenButton(panel, label="添加窗口")
-        button2 = buttons.GenButton(panel, label="删除窗口")
-        middle_sizer.Add(button1, 0, wx.EXPAND | wx.ALL, 5)
-        middle_sizer.Add(button2, 0, wx.EXPAND | wx.ALL, 5)
+        self.add_binding_btn = buttons.GenButton(panel, label="添加绑定-->")
+        self.remove_binding_btn = buttons.GenButton(panel, label="<--删除绑定")
+        self.refresh_btn = buttons.GenButton(panel, label="刷新进程")
+        middle_sizer.Add(self.add_binding_btn, 0, wx.EXPAND | wx.ALL, 5)
+        middle_sizer.Add(self.remove_binding_btn, 0, wx.EXPAND | wx.ALL, 5)
+        middle_sizer.Add(self.refresh_btn, 0, wx.EXPAND | wx.ALL, 5)
 
         # 右边列表
         right_staticbox = wx.StaticBox(panel, label="已绑定进程")
         right_sizer = wx.StaticBoxSizer(right_staticbox, wx.VERTICAL)
-        right_listctrl = wx.ListCtrl(panel, style=wx.LC_REPORT)
-        right_listctrl.EnableCheckBoxes(True)
-        right_listctrl.InsertColumn(1, '窗口标题', width=100)
-        right_listctrl.InsertColumn(2, '窗口句柄', width=100)
-        right_listctrl.InsertColumn(3, '启动进程', width=100)
-        right_sizer.Add(right_listctrl, 1, wx.EXPAND | wx.ALL, 5)
+        self.right_listctrl = wx.ListCtrl(panel, style=wx.LC_REPORT)
+        self.right_listctrl.EnableCheckBoxes(True)
+        self.right_listctrl.InsertColumn(0, '窗口标题', width=150)
+        self.right_listctrl.InsertColumn(1, '窗口句柄', width=100)
+        self.right_listctrl.InsertColumn(2, '启动进程', width=150)
+        self.right_listctrl.InsertColumn(3, '进程PID', width=150)
+        right_sizer.Add(self.right_listctrl, 1, wx.EXPAND | wx.ALL, 5)
 
         # 加到上方的sizer中
         top_sizer.Add(left_sizer, 1, wx.EXPAND | wx.ALL, 5)
@@ -137,22 +137,67 @@ class SettingWindow(wx.Frame):
         self.save_btn.Bind(wx.EVT_BUTTON, self.OnSave)
         self.reset_btn.Bind(wx.EVT_BUTTON,self.OnReset)
         self.hide_show_hotkey_btn.Bind(wx.EVT_BUTTON, self.OnRecordSW)
-        # self.CS_record_btn.Bind(wx.EVT_BUTTON, self.OnRecordCS)
         self.close_hotkey_btn.Bind(wx.EVT_BUTTON, self.OnRecordCL)
         self.send_before_hide_checkbox.Bind(wx.EVT_CHECKBOX, self.OnSendBeforeHide)
+        self.refresh_btn.Bind(wx.EVT_BUTTON, self.SetLeftList)
+        self.add_binding_btn.Bind(wx.EVT_BUTTON, self.OnAddBinding)
+        self.remove_binding_btn.Bind(wx.EVT_BUTTON, self.OnRemoveBinding)
         self.Bind(wx.EVT_CLOSE,self.OnClose)
 
     def SetData(self):
         Config.load()
         self.hide_show_hotkey_text.SetValue(Config.hide_hotkey)
-        # self.CS_text.SetValue(Config.startup_hotkey)
         self.close_hotkey_text.SetValue(Config.close_hotkey)
         self.mute_after_hide_checkbox.SetValue(bool(Config.mute_after_hide))
         self.send_before_hide_checkbox.SetValue(bool(Config.send_before_hide))
+        self.SetLeftList()
+
+    def SetLeftList(self,e=None):
+        windows=self.getWindows()
+        self.left_listctrl.DeleteAllItems()
+        right_items = self.getAllItems(self.right_listctrl)
+        print(right_items)
+        for window in windows:
+            if window['hwnd'] not in right_items:
+                index = self.left_listctrl.InsertItem(self.left_listctrl.GetItemCount(), window['title'])
+                self.left_listctrl.SetItem(index, 1, str(window['hwnd']))
+                self.left_listctrl.SetItem(index, 2, window['process'])  # Placeholder for process name
+                self.left_listctrl.SetItem(index, 3, str(window['PID']))  # Placeholder for process name
+                self.left_listctrl.SetItemData(index, window['hwnd'])
+
+    def getAllItems(self, listctrl:wx.ListCtrl):
+        items = []
+        for i in range(listctrl.GetItemCount()):
+            items.append(listctrl.GetItemData(i))
+        return items
+    
+    def getSelectedItems(self, listctrl:wx.ListCtrl):
+        items = []
+        for i in range(listctrl.GetItemCount()):
+            if listctrl.IsItemChecked(i):
+                items.append(listctrl.GetItemData(i))
+        return items
+
+    def getWindows(self):
+        # 获取所有窗口信息
+        def enumHandler(hwnd, windows:list):
+            if win32gui.IsWindowVisible(hwnd):
+                title = win32gui.GetWindowText(hwnd)
+                if not title or title=="":
+                    title="N/A"
+                pid = win32process.GetWindowThreadProcessId(hwnd)[1]
+                process_name = psutil.Process(pid).name()
+                windows.append({'title': title, 'hwnd': hwnd, 'process': process_name, 'PID':pid})  # Placeholder for process name
+            return True
+
+        windows = []
+        win32gui.EnumWindows(enumHandler, windows)
+        windows.sort(key=lambda x: x['process'])
+
+        return windows
 
     def OnSave(self,e):
         Config.hide_hotkey = self.hide_show_hotkey_text.GetValue()
-        # Config.startup_hotkey = self.CS_text.GetValue()
         Config.close_hotkey = self.close_hotkey_text.GetValue()
         Config.mute_after_hide = self.mute_after_hide_checkbox.GetValue()
         Config.send_before_hide = self.send_before_hide_checkbox.GetValue()
@@ -163,10 +208,35 @@ class SettingWindow(wx.Frame):
         except:
             wx.MessageDialog(None, u"热键绑定失败，请重试", u"Boss Key", wx.OK | wx.ICON_ERROR).ShowModal()
         
+    def OnAddBinding(self,e):
+        itemConut = self.left_listctrl.GetItemCount()
+        for i in range(itemConut):
+            if self.left_listctrl.IsItemChecked(i):
+                index = self.right_listctrl.InsertItem(self.right_listctrl.GetItemCount(), self.left_listctrl.GetItemText(i))
+                self.right_listctrl.SetItem(index, 1, self.left_listctrl.GetItemText(i, 1))
+                self.right_listctrl.SetItem(index, 2, self.left_listctrl.GetItemText(i, 2))
+                self.right_listctrl.SetItem(index, 3, self.left_listctrl.GetItemText(i, 3))
+                self.right_listctrl.SetItemData(index, self.left_listctrl.GetItemData(i))
+        for i in range(itemConut-1,-1,-1):
+            if self.left_listctrl.IsItemChecked(i):
+                self.left_listctrl.DeleteItem(i)
+            
+
+    def OnRemoveBinding(self,e):
+        itemConut = self.right_listctrl.GetItemCount()
+        for i in range(itemConut):
+            if self.right_listctrl.IsItemChecked(i):
+                index = self.left_listctrl.InsertItem(self.left_listctrl.GetItemCount(), self.right_listctrl.GetItemText(i))
+                self.left_listctrl.SetItem(index, 1, self.right_listctrl.GetItemText(i, 1))
+                self.left_listctrl.SetItem(index, 2, self.right_listctrl.GetItemText(i, 2))
+                self.left_listctrl.SetItem(index, 3, self.right_listctrl.GetItemText(i, 3))
+                self.left_listctrl.SetItemData(index, self.right_listctrl.GetItemData(i))
+        for i in range(itemConut-1,-1,-1):
+            if self.right_listctrl.IsItemChecked(i):
+                self.right_listctrl.DeleteItem(i)
 
     def OnReset(self,e):
         self.hide_show_hotkey_text.SetValue("Ctrl+Q")
-        # self.CS_text.SetValue("Alt+Q")
         self.close_hotkey_text.SetValue("Win+Esc")
         wx.MessageDialog(None, u"已重置选项，请保存设置以启用", u"Boss Key", wx.OK | wx.ICON_INFORMATION).ShowModal()
 
