@@ -42,7 +42,7 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
             else:
                 tool.sendNotify(title="开机自启状态变化",message="Boss Key开机自启状态未知")
         except:
-            tool.sendNotify(title="程序运行出错",message=f"Boss Key程序运行出错，请尝试按下{Config.close_hotkey}重启程序")
+            tool.sendNotify(title="程序运行出错",message=f"Boss Key程序运行出错，请尝试重启程序")
 
     def onSetting(self,e):
         Config.SettingWindow.Show()
