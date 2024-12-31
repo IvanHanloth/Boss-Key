@@ -37,8 +37,6 @@ SOFTWARE.
 """
 
     hwnd=0
-    hwnd_b = ""
-    hwnd_n = ''
     times=1
 
     hide_hotkey = "Ctrl+Q"
