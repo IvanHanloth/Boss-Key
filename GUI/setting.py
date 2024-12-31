@@ -65,7 +65,7 @@ class SettingWindow(wx.Frame):
         top_sizer.Add(right_sizer, 1, wx.EXPAND | wx.ALL, 5)
 
         # 下方设置
-        bottom_staticbox = wx.StaticBox(panel, label="设置")
+        bottom_staticbox = wx.StaticBox(panel, label="其他设置")
         bottom_sizer = wx.StaticBoxSizer(bottom_staticbox, wx.VERTICAL)
 
         hotkey_sizer=wx.BoxSizer(wx.HORIZONTAL)
@@ -150,6 +150,11 @@ class SettingWindow(wx.Frame):
         self.refresh_btn.Bind(wx.EVT_BUTTON, self.RefreshLeftList)
         self.add_binding_btn.Bind(wx.EVT_BUTTON, self.OnAddBinding)
         self.remove_binding_btn.Bind(wx.EVT_BUTTON, self.OnRemoveBinding)
+        # self.left_listctrl.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnToggleCheck)
+        # self.right_listctrl.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnToggleCheck)
+        self.left_listctrl.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnToggleCheck)
+        self.right_listctrl.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnToggleCheck)
+        
         self.Bind(wx.EVT_CLOSE,self.OnClose)
 
     def SetData(self):
@@ -162,19 +167,17 @@ class SettingWindow(wx.Frame):
         self.InsertList(self.getWindows(),self.left_listctrl,True)
         self.InsertList(Config.hide_binding,self.right_listctrl,True)
 
-    def RefreshLeftList(self):
+    def RefreshLeftList(self,e=None):
         windows=self.getWindows()
         for i in range(self.left_listctrl.GetItemCount()):
             if self.left_listctrl.GetItemData(i) in windows:
                 continue
             self.InsertList([self.left_listctrl.GetItemData(i)],self.left_listctrl,False)
 
-
     def InsertList(self,data:list,contrl:wx.ListCtrl,clear=True):
         if clear:
             contrl.DeleteAllItems()
         for window in data:
-            print(window)
             index = contrl.InsertItem(contrl.GetItemCount(), window['title'])
             contrl.SetItem(index, 1, str(window['hwnd']))
             contrl.SetItem(index, 2, window['process'])
@@ -218,7 +221,7 @@ class SettingWindow(wx.Frame):
 
         windows = []
         win32gui.EnumWindows(enumHandler, windows)
-        windows.sort(key=lambda x: x['process'])
+        windows.sort(key=lambda x: x['title'])
 
         return windows
 
@@ -258,6 +261,11 @@ class SettingWindow(wx.Frame):
         self.hide_show_hotkey_text.SetValue("Ctrl+Q")
         self.close_hotkey_text.SetValue("Win+Esc")
         wx.MessageDialog(None, u"已重置选项，请保存设置以启用", u"Boss Key", wx.OK | wx.ICON_INFORMATION).ShowModal()
+
+    def OnToggleCheck(self,e):
+        listctrl = e.GetEventObject()
+        index = e.GetIndex()
+        listctrl.CheckItem(index, not listctrl.IsItemChecked(index))
 
     def OnSendBeforeHide(self,e):
         if self.send_before_hide_checkbox.GetValue():
