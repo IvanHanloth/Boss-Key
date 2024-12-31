@@ -7,8 +7,8 @@ from io import BytesIO
 
 class Config:
     AppName = "Boss Key"
-    AppVersion = "1.4.3.0"
-    AppReleaseDate = "2024-12-19"
+    AppVersion = "2.0.0.0"
+    AppReleaseDate = "2025-1-1"
     AppAuthor = "IvanHanloth"
     AppDescription = "老板来了？快用Boss-Key一键隐藏静音当前窗口！上班摸鱼必备神器"
     AppCopyRight = "Copyright © 2022-2025 Ivan Hanloth All Rights Reserved."
@@ -36,7 +36,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-    hwnd=0
+    history=[]
     times=1
 
     hide_hotkey = "Ctrl+Q"
@@ -45,6 +45,8 @@ SOFTWARE.
     mute_after_hide = True
     send_before_hide = False
     hide_current=True
+
+    hide_binding = []
     
     config_path = os.path.join(os.getcwd(), "config.json")
     icon=BytesIO(get_icon())
@@ -72,12 +74,16 @@ SOFTWARE.
         with open(Config.config_path, 'r', encoding='utf-8') as f:
             config = json.load(f)
 
-        Config.hwnd = config.get("history", {}).get("hwnd", 0)
+        Config.history = config.get("history", [])
+
         Config.mute_after_hide = config.get("setting", {}).get("mute_after_hide", True)
         Config.send_before_hide = config.get("setting", {}).get("send_before_hide", False)
         Config.hide_current = config.get("setting", {}).get("hide_current", True)
+
         Config.hide_hotkey = config.get("hotkey", {}).get("hide_hotkey", "Ctrl+Q")
         Config.close_hotkey = config.get("hotkey", {}).get("close_hotkey", "Win+Esc")
+
+        Config.hide_binding = config.get("hide_binding", [])
 
         if config.get('version', '') != Config.AppVersion:
             Config.save()
@@ -87,9 +93,7 @@ SOFTWARE.
     def save():
         config = {
             'version': Config.AppVersion,
-            'history': {
-                'hwnd': Config.hwnd
-            },
+            'history': Config.history,
             'hotkey': {
                 'hide_hotkey': Config.hide_hotkey,
                 'close_hotkey': Config.close_hotkey
@@ -98,7 +102,8 @@ SOFTWARE.
                 'mute_after_hide': Config.mute_after_hide,
                 'send_before_hide': Config.send_before_hide,
                 'hide_current': Config.hide_current
-            }
+            },
+            "hide_binding" : Config.hide_binding
         }
 
         with open(Config.config_path, 'w', encoding='utf-8') as f:
@@ -111,7 +116,7 @@ SOFTWARE.
         configpath=os.path.join(os.getcwd(), "config.ini")
         config.read(configpath, encoding='utf-8')
     
-        Config.hwnd = config.getint("history", "hwnd", fallback=0)
+        Config.history = config.getint("history", "hwnd", fallback=0)
         Config.mute_after_hide = config.getboolean("setting", "mute_after_hide", fallback=True)
         Config.send_before_hide = config.getboolean("setting", "send_before_hide", fallback=False)
         Config.hide_hotkey = config.get("hotkey", "hide_hotkey", fallback="Ctrl+Q")

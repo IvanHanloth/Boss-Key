@@ -43,17 +43,11 @@ def changeMute(hwnd,flag=1):
     """
     flag=1 mute
     """
-    # print(hwnd)
-    # SendMessage(int(hwnd),0x319, 0x200eb0, 0x08*0x10000)
     hwnd=int(hwnd)
     process=win32process.GetWindowThreadProcessId(hwnd)
     sessions = AudioUtilities.GetAllSessions()
     for session in sessions:
         volume = session.SimpleAudioVolume
-        # if session.Process:
-        #     print(session.Process.pid)
-        #     print("process[1]",psutil.Process(process[1]))
-        #     print("session.Process",session.Process)
         if session.Process and session.Process.name() == psutil.Process(process[1]).name():
             print("mute")
             volume.SetMute(flag, None)

@@ -147,7 +147,7 @@ class SettingWindow(wx.Frame):
         self.hide_show_hotkey_btn.Bind(wx.EVT_BUTTON, self.OnRecordSW)
         self.close_hotkey_btn.Bind(wx.EVT_BUTTON, self.OnRecordCL)
         self.send_before_hide_checkbox.Bind(wx.EVT_CHECKBOX, self.OnSendBeforeHide)
-        self.refresh_btn.Bind(wx.EVT_BUTTON, self.SetLeftList)
+        self.refresh_btn.Bind(wx.EVT_BUTTON, self.RefreshLeftList)
         self.add_binding_btn.Bind(wx.EVT_BUTTON, self.OnAddBinding)
         self.remove_binding_btn.Bind(wx.EVT_BUTTON, self.OnRemoveBinding)
         self.Bind(wx.EVT_CLOSE,self.OnClose)
@@ -159,32 +159,49 @@ class SettingWindow(wx.Frame):
         self.mute_after_hide_checkbox.SetValue(Config.mute_after_hide)
         self.send_before_hide_checkbox.SetValue(Config.send_before_hide)
         self.hide_current_checkbox.SetValue(Config.hide_current)
-        self.SetLeftList()
+        self.InsertList(self.getWindows(),self.left_listctrl,True)
+        self.InsertList(Config.hide_binding,self.right_listctrl,True)
 
-    def SetLeftList(self,e=None):
+    def RefreshLeftList(self):
         windows=self.getWindows()
-        self.left_listctrl.DeleteAllItems()
-        right_items = self.getAllItems(self.right_listctrl)
-        print(right_items)
-        for window in windows:
-            if window['hwnd'] not in right_items:
-                index = self.left_listctrl.InsertItem(self.left_listctrl.GetItemCount(), window['title'])
-                self.left_listctrl.SetItem(index, 1, str(window['hwnd']))
-                self.left_listctrl.SetItem(index, 2, window['process'])  # Placeholder for process name
-                self.left_listctrl.SetItem(index, 3, str(window['PID']))  # Placeholder for process name
-                self.left_listctrl.SetItemData(index, window['hwnd'])
+        for i in range(self.left_listctrl.GetItemCount()):
+            if self.left_listctrl.GetItemData(i) in windows:
+                continue
+            self.InsertList([self.left_listctrl.GetItemData(i)],self.left_listctrl,False)
+
+
+    def InsertList(self,data:list,contrl:wx.ListCtrl,clear=True):
+        if clear:
+            contrl.DeleteAllItems()
+        for window in data:
+            print(window)
+            index = contrl.InsertItem(contrl.GetItemCount(), window['title'])
+            contrl.SetItem(index, 1, str(window['hwnd']))
+            contrl.SetItem(index, 2, window['process'])
+            contrl.SetItem(index, 3, str(window['PID']))
+            contrl.SetItemData(index, int(window['hwnd']))
 
     def getAllItems(self, listctrl:wx.ListCtrl):
         items = []
         for i in range(listctrl.GetItemCount()):
-            items.append(listctrl.GetItemData(i))
+            items.append({
+                "title":listctrl.GetItemText(i,0),
+                "hwnd":listctrl.GetItemText(i,1),
+                "process":listctrl.GetItemText(i,2),
+                "PID":listctrl.GetItemText(i,3)
+            })
         return items
     
     def getSelectedItems(self, listctrl:wx.ListCtrl):
         items = []
         for i in range(listctrl.GetItemCount()):
             if listctrl.IsItemChecked(i):
-                items.append(listctrl.GetItemData(i))
+                items.append({
+                    "title":listctrl.GetItemText(i,0),
+                    "hwnd":listctrl.GetItemText(i,1),
+                    "process":listctrl.GetItemText(i,2),
+                    "PID":listctrl.GetItemText(i,3)
+                })
         return items
 
     def getWindows(self):
@@ -193,7 +210,7 @@ class SettingWindow(wx.Frame):
             if win32gui.IsWindowVisible(hwnd):
                 title = win32gui.GetWindowText(hwnd)
                 if not title or title=="":
-                    title="N/A"
+                    title="无标题窗口"
                 pid = win32process.GetWindowThreadProcessId(hwnd)[1]
                 process_name = psutil.Process(pid).name()
                 windows.append({'title': title, 'hwnd': hwnd, 'process': process_name, 'PID':pid})  # Placeholder for process name
@@ -211,6 +228,9 @@ class SettingWindow(wx.Frame):
         Config.mute_after_hide = self.mute_after_hide_checkbox.GetValue()
         Config.send_before_hide = self.send_before_hide_checkbox.GetValue()
         Config.hide_current = self.hide_current_checkbox.GetValue()
+
+        Config.hide_binding = self.getAllItems(self.right_listctrl)
+
         Config.save()
         try:
             Config.HotkeyWindow.reBind()
@@ -220,26 +240,16 @@ class SettingWindow(wx.Frame):
         
     def OnAddBinding(self,e):
         itemConut = self.left_listctrl.GetItemCount()
-        for i in range(itemConut):
-            if self.left_listctrl.IsItemChecked(i):
-                index = self.right_listctrl.InsertItem(self.right_listctrl.GetItemCount(), self.left_listctrl.GetItemText(i))
-                self.right_listctrl.SetItem(index, 1, self.left_listctrl.GetItemText(i, 1))
-                self.right_listctrl.SetItem(index, 2, self.left_listctrl.GetItemText(i, 2))
-                self.right_listctrl.SetItem(index, 3, self.left_listctrl.GetItemText(i, 3))
-                self.right_listctrl.SetItemData(index, self.left_listctrl.GetItemData(i))
+        left_checked=self.getSelectedItems(self.left_listctrl)
+        self.InsertList(left_checked,self.right_listctrl,False)
         for i in range(itemConut-1,-1,-1):
             if self.left_listctrl.IsItemChecked(i):
                 self.left_listctrl.DeleteItem(i)
 
     def OnRemoveBinding(self,e):
-        itemConut = self.right_listctrl.GetItemCount()
-        for i in range(itemConut):
-            if self.right_listctrl.IsItemChecked(i):
-                index = self.left_listctrl.InsertItem(self.left_listctrl.GetItemCount(), self.right_listctrl.GetItemText(i))
-                self.left_listctrl.SetItem(index, 1, self.right_listctrl.GetItemText(i, 1))
-                self.left_listctrl.SetItem(index, 2, self.right_listctrl.GetItemText(i, 2))
-                self.left_listctrl.SetItem(index, 3, self.right_listctrl.GetItemText(i, 3))
-                self.left_listctrl.SetItemData(index, self.right_listctrl.GetItemData(i))
+        itemConut = self.left_listctrl.GetItemCount()
+        right_checked=self.getSelectedItems(self.right_listctrl)
+        self.InsertList(right_checked,self.left_listctrl,False)
         for i in range(itemConut-1,-1,-1):
             if self.right_listctrl.IsItemChecked(i):
                 self.right_listctrl.DeleteItem(i)

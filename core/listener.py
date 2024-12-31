@@ -9,9 +9,7 @@ import time
 class HotkeyListener():
     def __init__(self):
         try:
-            ShowWindow(Config.hwnd, SW_SHOW)
-            if Config.mute_after_hide:
-                tool.changeMute(Config.hwnd,0)
+            self.ShowWindows()
         except:
             pass
         tool.sendNotify("Boss Key正在运行！", "Boss Key正在为您服务，您可通过托盘图标看到我")
@@ -40,29 +38,37 @@ class HotkeyListener():
     def onHide(self,e=""):
         if Config.times == 1:
             # 隐藏窗口
-            current = GetForegroundWindow()
-            if Config.send_before_hide:
-                time.sleep(0.2)
-                keyboard.Controller().tap(keyboard.KeyCode.from_vk(0xB2))
-                
-            ShowWindow(current, SW_HIDE)
-            if Config.mute_after_hide:
-                tool.changeMute(current,1)
-            Config.hwnd=current
-            Config.times = 0
+            self.HideWindows()
         else:
-            # 显示窗口
-            ShowWindow(Config.hwnd, SW_SHOW)
+            self.ShowWindows()
+
+    def ShowWindows(self):
+        # 显示窗口
+        for i in Config.history:
+            ShowWindow(i, SW_SHOW)
             if Config.mute_after_hide:
-                tool.changeMute(Config.hwnd,0)
-            Config.times = 1
+                tool.changeMute(i,0)
+                
+        Config.times = 1
+        Config.save()
+    
+    def HideWindows(self):
+        # 隐藏窗口
+        current = GetForegroundWindow()
+        if Config.send_before_hide:
+            time.sleep(0.2)
+            keyboard.Controller().tap(keyboard.KeyCode.from_vk(0xB2))
+            
+        ShowWindow(current, SW_HIDE)
+        if Config.mute_after_hide:
+            tool.changeMute(current,1)
+        Config.history=current
+        Config.times = 0
         Config.save()
 
     def Close(self,e=""):
         tool.sendNotify("Boss Key已停止服务", "Boss Key已成功退出")
-        if Config.times == 0:
-            ShowWindow(Config.hwnd, SW_SHOW)
-            Config.times = 1
+        self.ShowWindows()
             
         self.stop()
         Config.TaskBarIcon.Destroy()
