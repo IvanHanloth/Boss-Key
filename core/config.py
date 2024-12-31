@@ -46,6 +46,7 @@ SOFTWARE.
 
     mute_after_hide = True
     send_before_hide = False
+    hide_current=True
     
     config_path = os.path.join(os.getcwd(), "config.json")
     icon=BytesIO(get_icon())
@@ -76,6 +77,7 @@ SOFTWARE.
         Config.hwnd = config.get("history", {}).get("hwnd", 0)
         Config.mute_after_hide = config.get("setting", {}).get("mute_after_hide", True)
         Config.send_before_hide = config.get("setting", {}).get("send_before_hide", False)
+        Config.hide_current = config.get("setting", {}).get("hide_current", True)
         Config.hide_hotkey = config.get("hotkey", {}).get("hide_hotkey", "Ctrl+Q")
         Config.close_hotkey = config.get("hotkey", {}).get("close_hotkey", "Win+Esc")
 
@@ -96,7 +98,8 @@ SOFTWARE.
             },
             'setting': {
                 'mute_after_hide': Config.mute_after_hide,
-                'send_before_hide': Config.send_before_hide
+                'send_before_hide': Config.send_before_hide,
+                'hide_current': Config.hide_current
             }
         }
 

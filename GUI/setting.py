@@ -107,9 +107,17 @@ class SettingWindow(wx.Frame):
         self.send_before_hide_checkbox = wx.CheckBox(panel, -1, "")
         send_before_hide_sizer.Add(send_before_hide_label,proportion=1, flag=wx.EXPAND| wx.ALL)
         send_before_hide_sizer.Add(self.send_before_hide_checkbox,proportion=1, flag=wx.EXPAND| wx.ALL)
+
+        
+        hide_current_sizer=wx.BoxSizer(wx.HORIZONTAL)
+        hide_current_label = wx.StaticText(panel, label="同时隐藏当前活动窗口")
+        self.hide_current_checkbox = wx.CheckBox(panel, -1, "")
+        hide_current_sizer.Add(hide_current_label,proportion=1, flag=wx.EXPAND| wx.ALL)
+        hide_current_sizer.Add(self.hide_current_checkbox,proportion=1, flag=wx.EXPAND| wx.ALL)
         
         settings_checkbox_sizer.Add(mute_after_hide_sizer,proportion=1,flag=wx.EXPAND| wx.ALL, border=10)
         settings_checkbox_sizer.Add(send_before_hide_sizer, proportion=1,flag=wx.EXPAND| wx.ALL, border=10)
+        settings_checkbox_sizer.Add(hide_current_sizer, proportion=1,flag=wx.EXPAND| wx.ALL, border=10)
 
         bottom_sizer.Add(settings_checkbox_sizer, proportion=1,flag=wx.EXPAND| wx.ALL, border=10)
         
@@ -148,8 +156,9 @@ class SettingWindow(wx.Frame):
         Config.load()
         self.hide_show_hotkey_text.SetValue(Config.hide_hotkey)
         self.close_hotkey_text.SetValue(Config.close_hotkey)
-        self.mute_after_hide_checkbox.SetValue(bool(Config.mute_after_hide))
-        self.send_before_hide_checkbox.SetValue(bool(Config.send_before_hide))
+        self.mute_after_hide_checkbox.SetValue(Config.mute_after_hide)
+        self.send_before_hide_checkbox.SetValue(Config.send_before_hide)
+        self.hide_current_checkbox.SetValue(Config.hide_current)
         self.SetLeftList()
 
     def SetLeftList(self,e=None):
@@ -201,6 +210,7 @@ class SettingWindow(wx.Frame):
         Config.close_hotkey = self.close_hotkey_text.GetValue()
         Config.mute_after_hide = self.mute_after_hide_checkbox.GetValue()
         Config.send_before_hide = self.send_before_hide_checkbox.GetValue()
+        Config.hide_current = self.hide_current_checkbox.GetValue()
         Config.save()
         try:
             Config.HotkeyWindow.reBind()
@@ -220,7 +230,6 @@ class SettingWindow(wx.Frame):
         for i in range(itemConut-1,-1,-1):
             if self.left_listctrl.IsItemChecked(i):
                 self.left_listctrl.DeleteItem(i)
-            
 
     def OnRemoveBinding(self,e):
         itemConut = self.right_listctrl.GetItemCount()

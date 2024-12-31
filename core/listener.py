@@ -41,7 +41,6 @@ class HotkeyListener():
         Config.hwnd_n = GetForegroundWindow()
         if Config.times == 1:
             # 隐藏窗口
-            print(Config.send_before_hide)
             if Config.send_before_hide:
                 time.sleep(0.2)
                 keyboard.Controller().tap(keyboard.KeyCode.from_vk(0xB2))
@@ -60,12 +59,6 @@ class HotkeyListener():
             Config.hwnd_b = ""
             Config.times = 1
         Config.save()
-
-    # def onStartup(self,e=""):
-    #     tool.sendNotify(
-    #         title="嗨！你好！",
-    #         message="也许你还在习惯于使用快捷键来切换开机启动，但是这个功能已经被移除了。\n现在你可以在托盘菜单中直接切换开机启动状态，希望你喜欢！\n此提示将在下个版本完全移除"
-    #     )
 
     def Close(self,e=""):
         tool.sendNotify("Boss Key已停止服务", "Boss Key已成功退出")
