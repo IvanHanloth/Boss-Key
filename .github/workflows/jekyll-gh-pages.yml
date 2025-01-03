@@ -108,7 +108,8 @@ jobs:
 
       - name: Copy additional files
         run: |
-          ls -AlR /
+          ls -AlR _site/
+          ls -AlR ./_site/
           cp _site/releases.json ./_site/releases.json
 
       - name: Upload artifact
