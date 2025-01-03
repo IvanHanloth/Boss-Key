@@ -4,6 +4,7 @@ from core.tools import *
 import threading
 from core.config import Config
 import webbrowser
+import datetime
 
 class AboutWindow():
     def __init__(self):
@@ -78,10 +79,15 @@ class UpdateWindow(wx.Dialog):
         new_version = wx.StaticText(self.panel, label="最新版本："+info['tag_name'])
         self.sizer.Add(new_version, 0, wx.ALIGN_LEFT|wx.EXPAND|wx.ALL, 5)
 
+        release_time = wx.StaticText(self.panel, label="发布时间："+datetime.datetime.strftime(info['published_at'], "%Y-%m-%d %H:%M:%S"))
+        self.sizer.Add(release_time, 0, wx.ALIGN_LEFT|wx.EXPAND|wx.ALL, 5)
+
         info_label = wx.StaticText(self.panel, label="更新内容：")
         info_text = wx.TextCtrl(self.panel, style=wx.TE_MULTILINE | wx.TE_READONLY)
         if Config.AppVersion == info['tag_name']:
             addtion_info = "您的版本已经是最新版本 :) \n\n"
+        else:
+            addtion_info = "有更新版本可用，请前往下载 :) \n\n"
         info_text.SetValue(addtion_info+info['body'])
         self.sizer.Add(info_label, 0, wx.ALIGN_LEFT|wx.EXPAND|wx.ALL, 5)
         self.sizer.Add(info_text, 1, wx.ALIGN_LEFT|wx.EXPAND|wx.ALL, 5)
