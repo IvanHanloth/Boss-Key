@@ -1,94 +1,84 @@
-name: Release Info Workflow
+name: Release on Tag
 
 on:
-  release:
-    types: [published, edited, deleted]  # 在 release 创建、修改、删除时触发
-  workflow_dispatch:  # 支持手动触发
+  push:
+    tags:
+      - '*'  # 监听所有标签的推送事件
+  workflow_dispatch:  # 允许手动触发工作流
 
 jobs:
-  fetch-and-sort-releases:
-    runs-on: ubuntu-latest
+  build-and-release:
+    runs-on: windows-2022  # 使用最新的 Windows 运行器
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      # 检出仓库代码
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'  # 使用 Python 3.9
+      # 设置 Python 3.11 环境
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install requests
+      # 安装依赖和 Nuitka
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          python --version
+        shell: cmd
 
-    - name: Create Python script
-      run: |
-        cat << 'EOF' > fetch_releases.py
-        import requests
-        import json
-        import os
-
-        # GitHub API 地址
-        repo = os.getenv('GITHUB_REPOSITORY')  # 获取当前仓库名称
-        url = f'https://api.github.com/repos/{repo}/releases'
-
-        # 请求头，使用 GITHUB_TOKEN 认证
-        headers = {
-            'Authorization': f'Bearer {os.getenv("GITHUB_TOKEN")}',
-            'Accept': 'application/vnd.github.v3+json'
-        }
-
-        # 获取所有 release
-        response = requests.get(url, headers=headers)
-        if response.status_code != 200:
-            raise Exception(f"Failed to fetch releases: {response.status_code} - {response.text}")
-
-        releases = response.json()
-
-        # 筛选需要的字段
-        filtered_releases = []
-        for release in releases:
-            filtered_release = {
-                "tag_name": release["tag_name"],
-                "published_at": release["published_at"],
-                "body": release["body"],
-                "assets": [
-                    {
-                        "name": asset["name"],
-                        "browser_download_url": asset["browser_download_url"]
-                    }
-                    for asset in release["assets"]
-                ]
+      # 进行编译
+      - name: Run Compile
+        run: |
+            $tag = '${{ github.ref_name }}'
+            $tag = $tag -replace '[^0-9.]', ''
+            $parts = $tag.Split('.')
+            while ($parts.Length -lt 4) {
+              $parts += '0'
             }
-            filtered_releases.append(filtered_release)
+            $tag = $parts -join '.'
+            python -m nuitka --windows-file-version=$tag --show-progress --mingw64 --quiet --assume-yes-for-downloads --output-dir=out Boss-Key.py
 
-        # 按时间顺序从旧到新排序
-        sorted_releases = sorted(filtered_releases, key=lambda x: x['published_at'])
 
-        # 将排序后的 release 信息保存为 JSON 文件
-        with open('releases.json', 'w') as f:
-            json.dump(sorted_releases, f, indent=2, ensure_ascii=False)
+      # 添加版本信息到可执行文件并重命名
+      - name: Add version information and rename executable
+        shell: pwsh
+        run: |
+          # 获取标签名作为版本号，去除前缀 refs/tags/
+          $tag = '${{ github.ref_name }}'
+  
+          # 定义新的文件名
+          $newExeName = "Boss-Key-$tag-onefile.exe"
+          
+          # 重命名可执行文件
+          Rename-Item "out/Boss-Key.exe" $newExeName
 
-        print("Releases saved to releases.json")
-        EOF
+          # 压缩out/Boss-Key.dist/文件夹
+          Compress-Archive -Path "out/Boss-Key.dist" -DestinationPath "out/Boss-Key-$tag-multifile.zip"
 
-    - name: Run Python script
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # 使用 GitHub Token 访问 API
-      run: |
-        python fetch_releases.py
-
-    - name: Move releases.json to .server directory
-      run: |
-        mkdir -p .server  # 创建 .server 目录（如果不存在）
-        mv releases.json .server/releases.json  # 移动文件到 .server 目录
-
-    - name: Commit and push changes
-      run: |
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git add .server/releases.json
-        git commit -m "Update releases.json with latest release data"
-        git push
+          ls out
+      # - name: Upload Artifacts
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: ${{ github.ref_name }} Build
+      #     path: |
+      #       out/Boss-Key-${{ github.ref_name }}.exe
+            
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+           out/Boss-Key-${{ github.ref_name }}-onefile.exe
+           out/Boss-Key-${{ github.ref_name }}-multifile.zip
+           
+          token: ${{ secrets.RELEASE }}
+          name: Boss Key ${{ github.ref_name }}
+          append_body: |
+            The executable file for version ${{ github.ref_name }}
+          make_latest: true
+          tag_name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
