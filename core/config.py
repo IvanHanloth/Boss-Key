@@ -7,7 +7,7 @@ from io import BytesIO
 
 class Config:
     AppName = "Boss Key"
-    AppVersion = "2.0.0.0"
+    AppVersion = "v2.0.0.0"
     AppReleaseDate = "2025-1-1"
     AppAuthor = "IvanHanloth"
     AppDescription = "老板来了？快用Boss-Key一键隐藏静音当前窗口！上班摸鱼必备神器"
