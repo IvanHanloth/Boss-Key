@@ -105,7 +105,7 @@ jobs:
           path: ./
 
       - name: list
-        run: ls -AlR dest
+        run: ls -AlR ./
 
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
