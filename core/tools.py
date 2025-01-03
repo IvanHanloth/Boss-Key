@@ -12,11 +12,14 @@ import json
 def check_update():
     requests.packages.urllib3.disable_warnings()
     # 获取最新版本信息
-    response = requests.get("https://ivanhanloth.github.io/Boss-Key/releases.json", verify=False,timeout=10)
+    try:
+        response = requests.get("https://ivanhanloth.github.io/Boss-Key/releases.json", verify=False,timeout=10)
+        
+        if response.status_code != 200:
+            raise Exception("无法检查更新")
+    except:
+        raise Exception("无法检查更新")
 
-    if response.status_code != 200:
-        return None
-    
     releases = json.loads(response.text)
 
     for release in releases:
@@ -25,17 +28,7 @@ def check_update():
     # 找到最新的版本
     latest_release = max(releases, key=lambda x: x['published_at'])
     
-    # 找到指定tag的版本
-    target_release = next((release for release in releases if release['tag_name'] == Config.AppVersion), None)
-    
-    if target_release is None:
-        return None
-    
-    # 比较发布时间
-    if target_release['published_at'] < latest_release['published_at']:
-        return latest_release
-    else:
-        return None
+    return latest_release
 
 def modifyStartup(name: str, file_path: str):
     key = OpenKey(HKEY_CURRENT_USER, "Software\Microsoft\Windows\CurrentVersion\Run", 0, KEY_ALL_ACCESS)
