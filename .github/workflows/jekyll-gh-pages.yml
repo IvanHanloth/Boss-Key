@@ -102,24 +102,24 @@ jobs:
         uses: actions/jekyll-build-pages@v1
         with:
           source: ./
-          destination: ./_site
+          destination: ~/_site
 
       - name: Download releases.json artifact
         uses: actions/download-artifact@v4
         with:
           name: releases-json
-          path: ./_site
+          path: ~/_site
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./_site
+          path: ~/_site
 
       - name: Upload final to airfact
         uses: actions/upload-artifact@v4
         with:
           name: build
-          path: ./_site
+          path: ~/_site
 
   deploy:
     environment:
