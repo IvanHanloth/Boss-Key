@@ -4,8 +4,8 @@ on:
   push:
     branches: ["main"]
   release:
-    types: [published, edited, deleted]  # 在 release 创建、修改、删除时触发
-  workflow_dispatch:  # 支持手动触发
+    types: [published, edited, deleted]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -27,7 +27,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'  # 使用 Python 3.9
+          python-version: '3.9'
 
       - name: Install dependencies
         run: |
@@ -41,24 +41,20 @@ jobs:
           import json
           import os
 
-          # GitHub API 地址
-          repo = os.getenv('GITHUB_REPOSITORY')  # 获取当前仓库名称
+          repo = os.getenv('GITHUB_REPOSITORY')
           url = f'https://api.github.com/repos/{repo}/releases'
 
-          # 请求头，使用 GITHUB_TOKEN 认证
           headers = {
               'Authorization': f'Bearer {os.getenv("GITHUB_TOKEN")}',
               'Accept': 'application/vnd.github.v3+json'
           }
 
-          # 获取所有 release
           response = requests.get(url, headers=headers)
           if response.status_code != 200:
               raise Exception(f"Failed to fetch releases: {response.status_code} - {response.text}")
 
           releases = response.json()
 
-          # 筛选需要的字段
           filtered_releases = []
           for release in releases:
               filtered_release = {
@@ -75,10 +71,8 @@ jobs:
               }
               filtered_releases.append(filtered_release)
 
-          # 按时间顺序从旧到新排序
           sorted_releases = sorted(filtered_releases, key=lambda x: x['published_at'])
 
-          # 将排序后的 release 信息保存为 JSON 文件
           with open('releases.json', 'w') as f:
               json.dump(sorted_releases, f, indent=2, ensure_ascii=False)
 
@@ -87,20 +81,20 @@ jobs:
 
       - name: Run Python script
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # 使用 GitHub Token 访问 API
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python fetch_releases.py
 
-      - name: Copy releases.json to _site directory
+      - name: Move releases.json to _site directory
         run: |
-          mkdir -p _site  # 创建 _site 目录（如果不存在）
-          mv releases.json _site/releases.json  # 移动文件到 _site 目录
+          mkdir -p _site
+          mv releases.json _site/releases.json
 
   build:
     runs-on: ubuntu-latest
     needs: fetch-and-sort-releases
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup Pages
