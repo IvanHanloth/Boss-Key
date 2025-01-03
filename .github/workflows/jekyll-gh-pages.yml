@@ -108,7 +108,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: releases-json
-          path: ./_site
+          path: _site
+
+      - name: Copy additional files
+        run: cp _site/releases.json ./_site/releases.json
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
