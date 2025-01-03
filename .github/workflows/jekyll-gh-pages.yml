@@ -109,6 +109,11 @@ jobs:
         with:
           name: releases-json
           path: ~/_site
+      
+      - name: List Directory
+        run: |
+          ls -AlR ./
+          ls ~/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
