@@ -66,12 +66,12 @@ jobs:
     - name: Move releases.json to /static directory
       run: |
         mkdir -p .server  # 创建 .server 目录（如果不存在）
-        mv releases.json .server/releases.json  # 移动文件到 static 目录
+        mv releases.json .server/releases.json  # 移动文件到 .server 目录
 
     - name: Commit and push changes
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git add static/releases.json
+        git add .server/releases.json
         git commit -m "Update releases.json with latest release data"
         git push
