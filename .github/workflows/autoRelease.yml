@@ -63,7 +63,7 @@ jobs:
       run: |
         python fetch_releases.py
 
-    - name: Move releases.json to /static directory
+    - name: Move releases.json to /.server directory
       run: |
         mkdir -p .server  # 创建 .server 目录（如果不存在）
         mv releases.json .server/releases.json  # 移动文件到 .server 目录
