@@ -102,7 +102,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: releases-json
-          path: ./dest
+          path: ./
 
       - name: list
         run: ls -AlR dest
