@@ -1,0 +1,71 @@
+name: Release Info Workflow
+
+on:
+  release:
+    types: [published, edited, deleted]  # 在 release 创建、修改、删除时触发
+  workflow_dispatch:  # 支持手动触发
+
+jobs:
+  fetch-and-sort-releases:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'  # 使用 Python 3.9
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests
+
+    - name: Fetch and sort releases
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # 使用 GitHub Token 访问 API
+      run: |
+        import requests
+        import json
+        import os
+
+        # GitHub API 地址
+        repo = os.getenv('GITHUB_REPOSITORY')  # 获取当前仓库名称
+        url = f'https://api.github.com/repos/{repo}/releases'
+
+        # 请求头，使用 GITHUB_TOKEN 认证
+        headers = {
+            'Authorization': f'Bearer {os.getenv("GITHUB_TOKEN")}',
+            'Accept': 'application/vnd.github.v3+json'
+        }
+
+        # 获取所有 release
+        response = requests.get(url, headers=headers)
+        if response.status_code != 200:
+            raise Exception(f"Failed to fetch releases: {response.status_code} - {response.text}")
+
+        releases = response.json()
+
+        # 按时间顺序从旧到新排序
+        sorted_releases = sorted(releases, key=lambda x: x['created_at'])
+
+        # 将排序后的 release 信息保存为 JSON 文件
+        with open('releases.json', 'w') as f:
+            json.dump(sorted_releases, f, indent=2)
+
+        print("Releases saved to releases.json")
+
+    - name: Move releases.json to /static directory
+      run: |
+        mkdir -p .server  # 创建 .server 目录（如果不存在）
+        mv releases.json .server/releases.json  # 移动文件到 static 目录
+
+    - name: Commit and push changes
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add static/releases.json
+        git commit -m "Update releases.json with latest release data"
+        git push
