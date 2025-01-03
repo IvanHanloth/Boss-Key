@@ -95,6 +95,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Download releases.json artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: releases-json
+          path: ./dest
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
@@ -103,12 +109,6 @@ jobs:
         with:
           source: ./
           destination: dest
-
-      - name: Download releases.json artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: releases-json
-          path: ./dest
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
