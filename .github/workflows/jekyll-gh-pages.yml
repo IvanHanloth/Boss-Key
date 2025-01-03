@@ -103,6 +103,8 @@ jobs:
         with:
           source: ./
           destination: dest
+
+      - name: list1
         run: |
           pwd
           ls -AlR dest
@@ -111,6 +113,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: releases-json
+
+      - name: list2
         run: |
           pwd
           ls -AlR dest
