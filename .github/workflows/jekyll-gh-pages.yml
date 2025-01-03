@@ -92,6 +92,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: fetch-and-sort-releases
     steps:
+      - name: Download releases.json artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: releases-json
+          path: _site
+
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -103,12 +109,6 @@ jobs:
         with:
           source: ./
           destination: ./_site
-
-      - name: Download releases.json artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: releases-json
-          path: _site
 
       - name: Copy additional files
         run: cp _site/releases.json ./_site/releases.json
