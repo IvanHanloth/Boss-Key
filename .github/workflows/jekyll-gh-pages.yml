@@ -104,20 +104,11 @@ jobs:
           source: ./
           destination: dest
 
-      - name: list1
-        run: |
-          pwd
-          ls -AlR dest
-
       - name: Download releases.json artifact
         uses: actions/download-artifact@v4
         with:
           name: releases-json
-
-      - name: list2
-        run: |
-          pwd
-          ls -AlR dest
+          path: /github/workspace/dest
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
