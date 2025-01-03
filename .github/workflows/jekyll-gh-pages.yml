@@ -107,7 +107,9 @@ jobs:
           destination: ./_site
 
       - name: Copy additional files
-        run: cp _site/releases.json ./_site/releases.json
+        run: |
+          ls -AlR /
+          cp _site/releases.json ./_site/releases.json
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
