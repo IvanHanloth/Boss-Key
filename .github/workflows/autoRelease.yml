@@ -27,6 +27,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # 使用 GitHub Token 访问 API
       run: |
+        python
         import requests
         import json
         import os
