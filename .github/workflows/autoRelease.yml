@@ -59,12 +59,13 @@ jobs:
           Compress-Archive -Path "out/Boss-Key.dist" -DestinationPath "out/Boss-Key-$tag-multifile.zip"
 
           ls out
-      # - name: Upload Artifacts
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: ${{ github.ref_name }} Build
-      #     path: |
-      #       out/Boss-Key-${{ github.ref_name }}.exe
+          
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.ref_name }} Build
+          path: |
+            out/Boss-Key-${{ github.ref_name }}-multifile.zip
             
       - name: Release
         uses: softprops/action-gh-release@v2
