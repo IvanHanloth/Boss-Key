@@ -103,15 +103,16 @@ jobs:
         with:
           source: ./
           destination: dest
+        run: |
+          pwd
+          ls -AlR dest
 
       - name: Download releases.json artifact
         uses: actions/download-artifact@v4
         with:
           name: releases-json
-      
-      - name: List Directory
         run: |
-          ls -AlR ./
+          pwd
           ls -AlR dest
 
       - name: Upload artifact
