@@ -1,8 +1,6 @@
 name: Release Info Workflow and Deploy Jekyll with GitHub Pages
 
 on:
-  push:
-    branches: ["main"]
   release:
     types: [published, edited, deleted]
   workflow_dispatch:
@@ -85,17 +83,18 @@ jobs:
         run: |
           python fetch_releases.py
 
-      - name: Move releases.json to _site directory
-        run: |
-          mkdir -p _site
-          mv releases.json _site/releases.json
+      - name: Upload releases.json as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: releases-json
+          path: releases.json
 
   build:
     runs-on: ubuntu-latest
     needs: fetch-and-sort-releases
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -106,11 +105,14 @@ jobs:
           source: ./
           destination: ./_site
 
+      - name: Download releases.json artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: releases-json
+          path: _site
+
       - name: Copy additional files
-        run: |
-          ls -AlR _site/
-          ls -AlR ./_site/
-          cp _site/releases.json ./_site/releases.json
+        run: cp _site/releases.json ./_site/releases.json
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
