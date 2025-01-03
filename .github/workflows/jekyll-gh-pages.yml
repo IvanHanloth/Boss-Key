@@ -95,14 +95,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
       - name: Download releases.json artifact
         uses: actions/download-artifact@v4
         with:
           name: releases-json
           path: ./dest
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
+      - name: list
+        run: ls -AlR dest
 
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
