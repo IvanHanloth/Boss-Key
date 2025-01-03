@@ -47,12 +47,29 @@ jobs:
 
         releases = response.json()
 
+        # 筛选需要的字段
+        filtered_releases = []
+        for release in releases:
+            filtered_release = {
+                "tag_name": release["tag_name"],
+                "published_at": release["published_at"],
+                "body": release["body"],
+                "assets": [
+                    {
+                        "name": asset["name"],
+                        "browser_download_url": asset["browser_download_url"]
+                    }
+                    for asset in release["assets"]
+                ]
+            }
+            filtered_releases.append(filtered_release)
+
         # 按时间顺序从旧到新排序
-        sorted_releases = sorted(releases, key=lambda x: x['created_at'])
+        sorted_releases = sorted(filtered_releases, key=lambda x: x['published_at'])
 
         # 将排序后的 release 信息保存为 JSON 文件
         with open('releases.json', 'w') as f:
-            json.dump(sorted_releases, f, indent=2)
+            json.dump(sorted_releases, f, indent=2, ensure_ascii=False)
 
         print("Releases saved to releases.json")
         EOF
@@ -63,7 +80,7 @@ jobs:
       run: |
         python fetch_releases.py
 
-    - name: Move releases.json to /.server directory
+    - name: Move releases.json to .server directory
       run: |
         mkdir -p .server  # 创建 .server 目录（如果不存在）
         mv releases.json .server/releases.json  # 移动文件到 .server 目录
