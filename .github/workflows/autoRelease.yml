@@ -23,11 +23,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install requests
 
-    - name: Fetch and sort releases
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # 使用 GitHub Token 访问 API
+    - name: Create Python script
       run: |
-        python
+        cat << 'EOF' > fetch_releases.py
         import requests
         import json
         import os
@@ -57,6 +55,13 @@ jobs:
             json.dump(sorted_releases, f, indent=2)
 
         print("Releases saved to releases.json")
+        EOF
+
+    - name: Run Python script
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # 使用 GitHub Token 访问 API
+      run: |
+        python fetch_releases.py
 
     - name: Move releases.json to /static directory
       run: |
