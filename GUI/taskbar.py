@@ -6,7 +6,7 @@ import sys
 
 class TaskBarIcon(wx.adv.TaskBarIcon):
 
-    MENU_SETTING,MENU_EXIT,MENU_STARTUP = wx.NewIdRef(count=3)
+    MENU_SETTING,MENU_EXIT,MENU_STARTUP,MENU_UPDATE = wx.NewIdRef(count=4)
 
     def __init__(self):
         super().__init__()
@@ -21,12 +21,15 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
         self.Bind(wx.EVT_MENU, self.onStartup, id=self.MENU_STARTUP)
         self.Bind(wx.EVT_MENU, self.onExit, id=self.MENU_EXIT)
         self.Bind(wx.EVT_MENU, self.onAbout, id=wx.ID_ABOUT)
+        self.Bind(wx.EVT_MENU, self.onUpdate, id=self.MENU_UPDATE)
 
     def CreatePopupMenu(self):
         menu = wx.Menu()
         menu.Append(self.MENU_SETTING, '设置')
         menu.Append(self.MENU_STARTUP, '开机自启', kind=wx.ITEM_CHECK)
         menu.Check(self.MENU_STARTUP, tool.checkStartup("Boss Key Application",Config.file_path))
+        menu.AppendSeparator()
+        menu.Append(self.MENU_UPDATE, '检查更新')
         menu.Append(wx.ID_ABOUT, '关于')
         menu.AppendSeparator()
         menu.Append(self.MENU_EXIT, '退出')
@@ -53,3 +56,10 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
     def onExit(self,e):
         Config.HotkeyWindow.Close()
         sys.exit(0)
+
+    def onUpdate(self,e):
+        if Config.UpdateWindow!="":
+            Config.UpdateWindow.Show()
+        else:
+            Config.UpdateWindow=about.UpdateWindow()
+            Config.UpdateWindow.Show()

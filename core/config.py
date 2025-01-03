@@ -57,6 +57,7 @@ SOFTWARE.
     SettingWindow=""
     HotkeyWindow=""
     TaskBarIcon=""
+    UpdateWindow=""
     
     recording_hotkey = False
     recorded_hotkey = None
