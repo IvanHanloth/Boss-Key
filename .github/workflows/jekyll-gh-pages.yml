@@ -1,6 +1,8 @@
 name: Release Info Workflow and Deploy Jekyll with GitHub Pages
 
 on:
+  push:
+    branches: ["main"]
   release:
     types: [published, edited, deleted]
   workflow_dispatch:
@@ -81,7 +83,7 @@ jobs:
           python fetch_releases.py
 
       - name: Upload releases.json as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: releases-json
           path: releases.json
@@ -103,7 +105,7 @@ jobs:
           destination: ./_site
 
       - name: Download releases.json artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: releases-json
           path: ./_site
