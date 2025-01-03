@@ -108,7 +108,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: releases-json
-          path: /github/workspace/dest
+          path: ./dest
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
