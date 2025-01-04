@@ -1,1 +1,0 @@
-nuitka --windows-file-version=$tag --show-progress --mingw64 --quiet --assume-yes-for-downloads --output-dir=out Boss-Key.py

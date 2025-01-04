@@ -29,7 +29,7 @@ class APP(wx.App):
         self.SetAppName(Config.AppName)
         self.SetAppDisplayName(Config.AppName)
         self.SetVendorName(Config.AppAuthor)
-        if self.is_already_running(sys.argv[0][:-4]+".lock"):
+        if self.is_already_running(os.path.join(os.path.dirname(sys.argv[0]),"Boss-Key.lock")):
             wx.MessageBox( "Boss Key is already running","Boss Key", wx.OK | wx.ICON_INFORMATION)
             sys.exit(0)
 
