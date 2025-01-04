@@ -8,7 +8,7 @@ from io import BytesIO
 class Config:
     AppName = "Boss Key"
     AppVersion = "v2.0.0.0"
-    AppReleaseDate = "2025-1-1"
+    AppReleaseDate = "2025-1-5"
     AppAuthor = "IvanHanloth"
     AppDescription = "老板来了？快用Boss-Key一键隐藏静音当前窗口！上班摸鱼必备神器"
     AppCopyRight = "Copyright © 2022-2025 Ivan Hanloth All Rights Reserved."
@@ -131,5 +131,4 @@ SOFTWARE.
         Config.save()
         os.remove(configpath)
         
-
 Config.load()
