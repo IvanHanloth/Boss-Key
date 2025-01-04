@@ -5,7 +5,7 @@ on:
 
 jobs:
   build-and-release:
-    runs-on: windows-2022  # 使用最新的 Windows 运行器
+    runs-on: windows-latest  # 使用最新的 Windows 运行器
 
     steps:
       # 检出仓库代码
@@ -29,7 +29,7 @@ jobs:
       # 进行编译
       - name: Run Compile
         run: |
-            python -m nuitka --windows-file-version=0.0.0.0 --show-progress --mingw64 --quiet --assume-yes-for-downloads --output-dir=out Boss-Key.py
+            python -m nuitka --windows-file-version=0.0.0.0 --show-progress --mingw64 --assume-yes-for-downloads --output-dir=out Boss-Key.py
 
       # 添加版本信息到可执行文件并重命名
       - name: Add version information and rename executable
@@ -53,4 +53,36 @@ jobs:
         with:
           name: Build-Test-Build
           path: |
-            out/Boss-Key-Build-Test-multifile.zip
+            out/Boss-Key.dist
+
+  compile-to-installer:
+    runs-on: windows-latest
+    needs: build-and-release
+    steps:
+    - name: Checkout code 
+      uses: actions/checkout@v2
+      
+    - name: Clone Repo
+      run: |
+        cd ./.github/inno-script
+        git clone https://github.com/IvanHanloth/innosetup-action.git
+        cp -r innosetup-action/* .
+        dir
+
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: Build-Test-Build
+        path: ./.github/inno-script/software
+
+    - name: Compile Installer
+      run: |
+        dir
+        .\ISCC.exe /DMyAppVersion='v2.0.0.0' Boss-Key.iss
+      working-directory: .github/inno-script
+
+    - name: Upload Installer
+      uses: actions/upload-artifact@v4
+      with:
+        name: Boss-Key-Installer
+        path: .github/inno-script/output/Boss-Key-v2.0.0.0-Installer.exe

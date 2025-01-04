@@ -4,11 +4,10 @@ on:
   push:
     tags:
       - '*'  # 监听所有标签的推送事件
-  workflow_dispatch:  # 允许手动触发工作流
 
 jobs:
   build-and-release:
-    runs-on: windows-2022  # 使用最新的 Windows 运行器
+    runs-on: windows-latest  # 使用最新的 Windows 运行器
 
     steps:
       # 检出仓库代码
@@ -39,7 +38,7 @@ jobs:
               $parts += '0'
             }
             $tag = $parts -join '.'
-            python -m nuitka --windows-file-version=$tag --show-progress --mingw64 --quiet --assume-yes-for-downloads --output-dir=out Boss-Key.py
+            python -m nuitka --windows-file-version=$tag --show-progress --mingw64 --assume-yes-for-downloads --output-dir=out Boss-Key.py
 
 
       # 添加版本信息到可执行文件并重命名
@@ -63,9 +62,9 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.ref_name }} Build
+          name: ${{ github.ref_name }}-Build
           path: |
-            out/Boss-Key-${{ github.ref_name }}-multifile.zip
+            out/Boss-Key.dist
             
       - name: Release
         uses: softprops/action-gh-release@v2
@@ -83,3 +82,44 @@ jobs:
           draft: false
           prerelease: false
           generate_release_notes: true
+
+  compile-to-installer:
+    runs-on: windows-latest
+    needs: build-and-release
+    steps:
+    - name: Checkout code 
+      uses: actions/checkout@v2
+      
+    - name: Clone Repo
+      run: |
+        cd ./.github/inno-script
+        git clone https://github.com/IvanHanloth/innosetup-action.git
+        cp -r innosetup-action/* .
+        dir
+
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ github.ref_name }}-Build
+        path: ./.github/inno-script/software
+
+    - name: Compile Installer
+      run: |
+        dir
+        .\ISCC.exe /DMyAppVersion='${{ github.ref_name }}' Boss-Key.iss
+      working-directory: .github/inno-script
+
+    - name: Upload Installer
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ github.ref_name }}-Installer
+        path: .github/inno-script/output/Boss-Key-${{ github.ref_name }}-Installer.exe
+
+    - name: Attach Installer to Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: .github/inno-script/output/Boss-Key-${{ github.ref_name }}-Installer.exe
+        token: ${{ secrets.RELEASE }}
+        tag_name: ${{ github.ref_name }}
+        draft: false
+        prerelease: false
