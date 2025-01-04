@@ -1,13 +1,12 @@
 import wx
 from core.config import Config
-import win32gui,win32process
-import psutil
 import GUI.record as record
+import core.tools as tool
 import wx.lib.buttons as buttons
 
 class SettingWindow(wx.Frame):
     def __init__(self):
-        super().__init__(None, title="设置 - Boss Key", style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+        super().__init__(None, title="设置 - Boss Key", style=wx.DEFAULT_FRAME_STYLE | wx.RESIZE_BORDER)
         self.SetIcon(wx.Icon(wx.Image(Config.icon).ConvertToBitmap()))
         
         self.init_UI()
@@ -150,8 +149,6 @@ class SettingWindow(wx.Frame):
         self.refresh_btn.Bind(wx.EVT_BUTTON, self.RefreshLeftList)
         self.add_binding_btn.Bind(wx.EVT_BUTTON, self.OnAddBinding)
         self.remove_binding_btn.Bind(wx.EVT_BUTTON, self.OnRemoveBinding)
-        # self.left_listctrl.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnToggleCheck)
-        # self.right_listctrl.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnToggleCheck)
         self.left_listctrl.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnToggleCheck)
         self.right_listctrl.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnToggleCheck)
         
@@ -164,15 +161,22 @@ class SettingWindow(wx.Frame):
         self.mute_after_hide_checkbox.SetValue(Config.mute_after_hide)
         self.send_before_hide_checkbox.SetValue(Config.send_before_hide)
         self.hide_current_checkbox.SetValue(Config.hide_current)
-        self.InsertList(self.getWindows(),self.left_listctrl,True)
         self.InsertList(Config.hide_binding,self.right_listctrl,True)
+        self.RefreshLeftList()
 
     def RefreshLeftList(self,e=None):
-        windows=self.getWindows()
-        for i in range(self.left_listctrl.GetItemCount()):
-            if self.left_listctrl.GetItemData(i) in windows:
-                continue
-            self.InsertList([self.left_listctrl.GetItemData(i)],self.left_listctrl,False)
+        windows=tool.getAllWindows()
+        right=self.getAllItems(self.right_listctrl)
+        list=[]
+        for window in windows:
+            flag=0
+            for i in right:
+                if tool.isSameWindow(window,i,True):
+                    flag=1
+                    break
+            if not flag:
+                list.append(window)
+        self.InsertList(list,self.left_listctrl,True)
 
     def InsertList(self,data:list,contrl:wx.ListCtrl,clear=True):
         if clear:
@@ -189,9 +193,9 @@ class SettingWindow(wx.Frame):
         for i in range(listctrl.GetItemCount()):
             items.append({
                 "title":listctrl.GetItemText(i,0),
-                "hwnd":listctrl.GetItemText(i,1),
+                "hwnd":int(listctrl.GetItemText(i,1)),
                 "process":listctrl.GetItemText(i,2),
-                "PID":listctrl.GetItemText(i,3)
+                "PID":int(listctrl.GetItemText(i,3))
             })
         return items
     
@@ -201,29 +205,11 @@ class SettingWindow(wx.Frame):
             if listctrl.IsItemChecked(i):
                 items.append({
                     "title":listctrl.GetItemText(i,0),
-                    "hwnd":listctrl.GetItemText(i,1),
+                    "hwnd":int(listctrl.GetItemText(i,1)),
                     "process":listctrl.GetItemText(i,2),
-                    "PID":listctrl.GetItemText(i,3)
+                    "PID":int(listctrl.GetItemText(i,3))
                 })
         return items
-
-    def getWindows(self):
-        # 获取所有窗口信息
-        def enumHandler(hwnd, windows:list):
-            if win32gui.IsWindowVisible(hwnd):
-                title = win32gui.GetWindowText(hwnd)
-                if not title or title=="":
-                    title="无标题窗口"
-                pid = win32process.GetWindowThreadProcessId(hwnd)[1]
-                process_name = psutil.Process(pid).name()
-                windows.append({'title': title, 'hwnd': hwnd, 'process': process_name, 'PID':pid})  # Placeholder for process name
-            return True
-
-        windows = []
-        win32gui.EnumWindows(enumHandler, windows)
-        windows.sort(key=lambda x: x['title'])
-
-        return windows
 
     def OnSave(self,e):
         Config.hide_hotkey = self.hide_show_hotkey_text.GetValue()

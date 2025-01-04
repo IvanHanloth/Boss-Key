@@ -54,15 +54,39 @@ class HotkeyListener():
     
     def HideWindows(self):
         # 隐藏窗口
-        current = GetForegroundWindow()
-        if Config.send_before_hide:
-            time.sleep(0.2)
-            keyboard.Controller().tap(keyboard.KeyCode.from_vk(0xB2))
-            
-        ShowWindow(current, SW_HIDE)
-        if Config.mute_after_hide:
-            tool.changeMute(current,1)
-        Config.history=current
+        needHide=[]
+        windows=tool.getAllWindows()
+        
+        outer=windows
+        inner=Config.hide_binding
+
+        #减少循环次数，选择相对较少的做外循环
+        if len(Config.hide_binding) < len(windows):
+            outer=Config.hide_binding
+            inner=windows
+
+        for i in outer:
+            flag=0
+            for j in inner:
+                if tool.isSameWindow(i,j,False):
+                    flag=1
+                    break
+            if flag:
+                needHide.append(i['hwnd'])
+
+        if Config.hide_current: # 插入当前窗口的句柄
+            needHide.append(GetForegroundWindow())
+
+        for i in needHide:
+            if Config.send_before_hide:
+                time.sleep(0.2)
+                keyboard.Controller().tap(keyboard.KeyCode.from_vk(0xB2))
+                
+            ShowWindow(i, SW_HIDE)
+            if Config.mute_after_hide:
+                tool.changeMute(i,1)
+
+        Config.history=needHide
         Config.times = 0
         Config.save()
 
