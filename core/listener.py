@@ -4,6 +4,7 @@ from win32gui import GetForegroundWindow, ShowWindow
 from win32con import SW_HIDE, SW_SHOW
 import sys
 from pynput import keyboard
+import multiprocessing
 import time
 
 class HotkeyListener():
@@ -17,22 +18,34 @@ class HotkeyListener():
         self.reBind()
     
     def stop(self):
-        if self.listener:
-            self.listener.stop()
-            self.listener = None
+        if self.listener is not None:
+            try:
+                self.listener.terminate()
+                self.listener.join()
+            except:
+                pass
+            finally:
+                self.listener = None
     
     def reBind(self):
         self.stop()
         self.BindHotKey()
-        
+    
+    def ListenerProcess(self,hotkey):
+        print(hotkey)
+        with keyboard.GlobalHotKeys(hotkey) as listener:
+            while True: #避免意外退出
+                listener.join()
+                print("线程意外退出")
+
     def BindHotKey(self):
-        self.hotkeys = {
+        hotkeys = {
             Config.hide_hotkey: self.onHide,
             Config.close_hotkey: self.Close
         }
-        self.hotkeys = tool.keyConvert(self.hotkeys)
-        print(self.hotkeys)
-        self.listener = keyboard.GlobalHotKeys(self.hotkeys)
+        hotkeys = tool.keyConvert(hotkeys)
+                
+        self.listener = multiprocessing.Process(target=self.ListenerProcess,daemon=True,args=(hotkeys,),name="Boss-Key热键监听进程")
         self.listener.start()
 
     def onHide(self,e=""):
