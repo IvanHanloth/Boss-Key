@@ -170,53 +170,6 @@ class SettingWindow(wx.Frame):
         self.InsertList(Config.hide_binding,self.right_listctrl,True)
         self.RefreshLeftList()
 
-    def RefreshLeftList(self,e=None):
-        windows=tool.getAllWindows()
-        right=self.getAllItems(self.right_listctrl)
-        list=[]
-        for window in windows:
-            flag=0
-            for i in right:
-                if tool.isSameWindow(window,i,True):
-                    flag=1
-                    break
-            if not flag:
-                list.append(window)
-        self.InsertList(list,self.left_listctrl,True)
-
-    def InsertList(self,data:list,contrl:wx.ListCtrl,clear=True):
-        if clear:
-            contrl.DeleteAllItems()
-        for window in data:
-            index = contrl.InsertItem(contrl.GetItemCount(), window['title'])
-            contrl.SetItem(index, 1, str(window['hwnd']))
-            contrl.SetItem(index, 2, window['process'])
-            contrl.SetItem(index, 3, str(window['PID']))
-            contrl.SetItemData(index, int(window['hwnd']))
-
-    def getAllItems(self, listctrl:wx.ListCtrl):
-        items = []
-        for i in range(listctrl.GetItemCount()):
-            items.append({
-                "title":listctrl.GetItemText(i,0),
-                "hwnd":int(listctrl.GetItemText(i,1)),
-                "process":listctrl.GetItemText(i,2),
-                "PID":int(listctrl.GetItemText(i,3))
-            })
-        return items
-    
-    def getSelectedItems(self, listctrl:wx.ListCtrl):
-        items = []
-        for i in range(listctrl.GetItemCount()):
-            if listctrl.IsItemChecked(i):
-                items.append({
-                    "title":listctrl.GetItemText(i,0),
-                    "hwnd":int(listctrl.GetItemText(i,1)),
-                    "process":listctrl.GetItemText(i,2),
-                    "PID":int(listctrl.GetItemText(i,3))
-                })
-        return items
-
     def OnSave(self,e):
         Config.hide_hotkey = self.hide_show_hotkey_text.GetValue()
         Config.close_hotkey = self.close_hotkey_text.GetValue()
@@ -229,7 +182,7 @@ class SettingWindow(wx.Frame):
 
         Config.save()
         try:
-            Config.HotkeyWindow.reBind()
+            Config.HotkeyListener.reBind()
             wx.MessageDialog(None, u"保存成功", u"Boss_Key", wx.OK | wx.ICON_INFORMATION).ShowModal()
         except:
             wx.MessageDialog(None, u"热键绑定失败，请重试", u"Boss Key", wx.OK | wx.ICON_ERROR).ShowModal()
@@ -278,10 +231,57 @@ class SettingWindow(wx.Frame):
 
     def OnRecordCL(self, e):
         self.recordHotkey(self.close_hotkey_text, self.close_hotkey_btn)
+    
+    def RefreshLeftList(self,e=None):
+        windows=tool.getAllWindows()
+        right=self.getAllItems(self.right_listctrl)
+        list=[]
+        for window in windows:
+            flag=0
+            for i in right:
+                if tool.isSameWindow(window,i,True):
+                    flag=1
+                    break
+            if not flag:
+                list.append(window)
+        self.InsertList(list,self.left_listctrl,True)
+
+    def InsertList(self,data:list,contrl:wx.ListCtrl,clear=True):
+        if clear:
+            contrl.DeleteAllItems()
+        for window in data:
+            index = contrl.InsertItem(contrl.GetItemCount(), window['title'])
+            contrl.SetItem(index, 1, str(window['hwnd']))
+            contrl.SetItem(index, 2, window['process'])
+            contrl.SetItem(index, 3, str(window['PID']))
+            contrl.SetItemData(index, int(window['hwnd']))
+
+    def getAllItems(self, listctrl:wx.ListCtrl):
+        items = []
+        for i in range(listctrl.GetItemCount()):
+            items.append({
+                "title":listctrl.GetItemText(i,0),
+                "hwnd":int(listctrl.GetItemText(i,1)),
+                "process":listctrl.GetItemText(i,2),
+                "PID":int(listctrl.GetItemText(i,3))
+            })
+        return items
+    
+    def getSelectedItems(self, listctrl:wx.ListCtrl):
+        items = []
+        for i in range(listctrl.GetItemCount()):
+            if listctrl.IsItemChecked(i):
+                items.append({
+                    "title":listctrl.GetItemText(i,0),
+                    "hwnd":int(listctrl.GetItemText(i,1)),
+                    "process":listctrl.GetItemText(i,2),
+                    "PID":int(listctrl.GetItemText(i,3))
+                })
+        return items
 
     def recordHotkey(self, text_ctrl:wx.TextCtrl, btn:wx.Button):
         try:
-            Config.HotkeyWindow.stop()
+            Config.HotkeyListener.stop()
         except:
             pass
         btn.Disable()

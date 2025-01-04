@@ -39,8 +39,8 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
     
     def onLeftClick(self,e=''):
         if Config.click_to_hide:
-            if Config.HotkeyWindow!="":
-                Config.HotkeyWindow.onHide()
+            if Config.HotkeyListener!="":
+                Config.HotkeyListener.onHide()
 
     def onStartup(self,e):
         try:
@@ -55,13 +55,14 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
             tool.sendNotify(title="程序运行出错",message=f"Boss Key程序运行出错，请尝试重启程序")
 
     def onSetting(self,e):
+        Config.SettingWindow.RefreshLeftList()
         Config.SettingWindow.Show()
 
     def onAbout(self,e):
         about.AboutWindow().Show()
 
     def onExit(self,e):
-        Config.HotkeyWindow.Close()
+        Config.HotkeyListener.Close()
         sys.exit(0)
 
     def onUpdate(self,e):

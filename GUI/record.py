@@ -22,7 +22,7 @@ class RecordWindow(wx.Dialog):
 
         self.Center()
         try:
-            Config.HotkeyWindow.stop()
+            Config.HotkeyListener.stop()
         except:
             pass
         RecordedHotkey.recording = True
