@@ -22,6 +22,8 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
         self.Bind(wx.EVT_MENU, self.onExit, id=self.MENU_EXIT)
         self.Bind(wx.EVT_MENU, self.onAbout, id=wx.ID_ABOUT)
         self.Bind(wx.EVT_MENU, self.onUpdate, id=self.MENU_UPDATE)
+        # 绑定任务栏图标单击事件
+        self.Bind(wx.adv.EVT_TASKBAR_LEFT_DOWN, self.onLeftClick)
 
     def CreatePopupMenu(self):
         menu = wx.Menu()
@@ -35,6 +37,11 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
         menu.Append(self.MENU_EXIT, '退出')
         return menu
     
+    def onLeftClick(self,e=''):
+        if Config.click_to_hide:
+            if Config.HotkeyWindow!="":
+                Config.HotkeyWindow.onHide()
+
     def onStartup(self,e):
         try:
             res = tool.modifyStartup("Boss Key Application",file_path=Config.file_path)

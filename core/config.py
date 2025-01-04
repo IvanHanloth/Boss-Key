@@ -46,6 +46,8 @@ SOFTWARE.
     send_before_hide = False
     hide_current=True
 
+    click_to_hide = True
+
     hide_binding = []
     
     config_path = os.path.join(os.getcwd(), "config.json")
@@ -80,6 +82,8 @@ SOFTWARE.
         Config.mute_after_hide = config.get("setting", {}).get("mute_after_hide", True)
         Config.send_before_hide = config.get("setting", {}).get("send_before_hide", False)
         Config.hide_current = config.get("setting", {}).get("hide_current", True)
+        
+        Config.click_to_hide= config.get("setting", {}).get("click_to_hide", True)
 
         Config.hide_hotkey = config.get("hotkey", {}).get("hide_hotkey", "Ctrl+Q")
         Config.close_hotkey = config.get("hotkey", {}).get("close_hotkey", "Win+Esc")
@@ -102,7 +106,8 @@ SOFTWARE.
             'setting': {
                 'mute_after_hide': Config.mute_after_hide,
                 'send_before_hide': Config.send_before_hide,
-                'hide_current': Config.hide_current
+                'hide_current': Config.hide_current,
+                'click_to_hide': Config.click_to_hide
             },
             "hide_binding" : Config.hide_binding
         }
