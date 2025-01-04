@@ -1,9 +1,8 @@
 # nuitka-project: --onefile
-# nuitka-project: --windows-disable-console
+# nuitka-project: --windows-console-mode=disable
 # nuitka-project: --standalone
 # nuitka-project: --follow-import-to=core
 # nuitka-project: --windows-icon-from-ico=icon.ico
-# nuitka-project: --include-data-file=icon.ico=.
 # nuitka-project: --windows-product-name="Boss Key"
 # nuitka-project: --windows-file-description="Boss Key Application"
 # nuitka-project: --copyright="Copyright (C) 2025 Ivan Hanloth All Rights Reserved. "
