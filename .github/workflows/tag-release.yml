@@ -38,7 +38,7 @@ jobs:
               $parts += '0'
             }
             $tag = $parts -join '.'
-            python -m nuitka --windows-file-version=$tag --show-progress --mingw64 --assume-yes-for-downloads --output-dir=out Boss-Key.py
+            python -m nuitka --windows-file-version=$tag --show-progress --mingw64 --assume-yes-for-downloads --output-dir=out main/Boss-Key.py
 
 
       # 添加版本信息到可执行文件并重命名
