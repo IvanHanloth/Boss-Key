@@ -55,6 +55,7 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
             tool.sendNotify(title="程序运行出错",message=f"Boss Key程序运行出错，请尝试重启程序")
 
     def onSetting(self,e):
+        Config.SettingWindow.RefreshLeftList()
         Config.SettingWindow.Show()
 
     def onAbout(self,e):
