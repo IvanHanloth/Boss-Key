@@ -6,7 +6,7 @@
 # nuitka-project: --include-data-file=icon.ico=.
 # nuitka-project: --windows-product-name="Boss Key"
 # nuitka-project: --windows-file-description="Boss Key Application"
-# nuitka-project: --copyright="Copyright (C) 2024 Ivan Hanloth All Rights Reserved. "
+# nuitka-project: --copyright="Copyright (C) 2025 Ivan Hanloth All Rights Reserved. "
 # nuitka-project: --windows-company-name="Ivan Hanloth"
 
 from GUI import setting, taskbar
@@ -61,7 +61,7 @@ class APP(wx.App):
 if __name__ == '__main__':
     app = APP()
     Config.TaskBarIcon=taskbar.TaskBarIcon()
-    Config.HotkeyWindow=listener.HotkeyListener()
+    Config.HotkeyListener=listener.HotkeyListener()
     Config.SettingWindow=setting.SettingWindow()
     if Config.first_start:
         Config.SettingWindow.Show()

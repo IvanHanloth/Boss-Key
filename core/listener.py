@@ -4,13 +4,13 @@ from win32gui import GetForegroundWindow, ShowWindow
 from win32con import SW_HIDE, SW_SHOW
 import sys
 from pynput import keyboard
+import multiprocessing
 import time
 
 class HotkeyListener():
     def __init__(self):
         try:
-            ShowWindow(Config.hwnd, SW_SHOW)
-            tool.changeMute(Config.hwnd,0)
+            self.ShowWindows()
         except:
             pass
         tool.sendNotify("Boss Key正在运行！", "Boss Key正在为您服务，您可通过托盘图标看到我")
@@ -18,61 +18,94 @@ class HotkeyListener():
         self.reBind()
     
     def stop(self):
-        if self.listener:
-            self.listener.stop()
-            self.listener = None
+        if self.listener is not None:
+            try:
+                self.listener.terminate()
+                self.listener.join()
+            except:
+                pass
+            finally:
+                self.listener = None
     
     def reBind(self):
         self.stop()
         self.BindHotKey()
-        
+    
+    def ListenerProcess(self,hotkey):
+        print(hotkey)
+        with keyboard.GlobalHotKeys(hotkey) as listener:
+            while True: #避免意外退出
+                listener.join()
+                print("线程意外退出")
+
     def BindHotKey(self):
-        self.hotkeys = {
+        hotkeys = {
             Config.hide_hotkey: self.onHide,
-            # Config.startup_hotkey: self.onStartup,
             Config.close_hotkey: self.Close
         }
-        self.hotkeys = tool.keyConvert(self.hotkeys)
-        print(self.hotkeys)
-        self.listener = keyboard.GlobalHotKeys(self.hotkeys)
+        hotkeys = tool.keyConvert(hotkeys)
+                
+        self.listener = multiprocessing.Process(target=self.ListenerProcess,daemon=True,args=(hotkeys,),name="Boss-Key热键监听进程")
         self.listener.start()
 
     def onHide(self,e=""):
-        Config.hwnd_n = GetForegroundWindow()
         if Config.times == 1:
             # 隐藏窗口
-            print(Config.send_before_hide)
+            self.HideWindows()
+        else:
+            self.ShowWindows()
+
+    def ShowWindows(self):
+        # 显示窗口
+        for i in Config.history:
+            ShowWindow(i, SW_SHOW)
+            if Config.mute_after_hide:
+                tool.changeMute(i,0)
+                
+        Config.times = 1
+        Config.save()
+    
+    def HideWindows(self):
+        # 隐藏窗口
+        needHide=[]
+        windows=tool.getAllWindows()
+        
+        outer=windows
+        inner=Config.hide_binding
+
+        #减少循环次数，选择相对较少的做外循环
+        if len(Config.hide_binding) < len(windows):
+            outer=Config.hide_binding
+            inner=windows
+
+        for i in outer:
+            flag=0
+            for j in inner:
+                if tool.isSameWindow(i,j,False):
+                    flag=1
+                    break
+            if flag:
+                needHide.append(i['hwnd'])
+
+        if Config.hide_current: # 插入当前窗口的句柄
+            needHide.append(GetForegroundWindow())
+
+        for i in needHide:
             if Config.send_before_hide:
                 time.sleep(0.2)
                 keyboard.Controller().tap(keyboard.KeyCode.from_vk(0xB2))
                 
-            ShowWindow(Config.hwnd_n, SW_HIDE)
+            ShowWindow(i, SW_HIDE)
             if Config.mute_after_hide:
-                tool.changeMute(Config.hwnd_n,1)
-            Config.hwnd_b=Config.hwnd_n
-            Config.hwnd=Config.hwnd_b
-            Config.times = 0
-        else:
-            # 显示窗口
-            ShowWindow(Config.hwnd_b, SW_SHOW)
-            if Config.mute_after_hide:
-                tool.changeMute(Config.hwnd_b,0)
-            Config.hwnd_b = ""
-            Config.times = 1
-        Config.save()
+                tool.changeMute(i,1)
 
-    # def onStartup(self,e=""):
-    #     tool.sendNotify(
-    #         title="嗨！你好！",
-    #         message="也许你还在习惯于使用快捷键来切换开机启动，但是这个功能已经被移除了。\n现在你可以在托盘菜单中直接切换开机启动状态，希望你喜欢！\n此提示将在下个版本完全移除"
-    #     )
+        Config.history=needHide
+        Config.times = 0
+        Config.save()
 
     def Close(self,e=""):
         tool.sendNotify("Boss Key已停止服务", "Boss Key已成功退出")
-        if Config.times == 0:
-            ShowWindow(Config.hwnd_b, SW_SHOW)
-            Config.hwnd_b = ""
-            Config.times = 1
+        self.ShowWindows()
             
         self.stop()
         Config.TaskBarIcon.Destroy()
