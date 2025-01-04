@@ -99,6 +99,7 @@ class SettingWindow(wx.Frame):
         self.mute_after_hide_checkbox = wx.CheckBox(panel, -1, "")
         mute_after_hide_sizer.Add(mute_after_hide_label,proportion=1, flag=wx.EXPAND| wx.ALL)
         mute_after_hide_sizer.Add(self.mute_after_hide_checkbox,proportion=1, flag=wx.EXPAND| wx.ALL)
+        settings_checkbox_sizer.Add(mute_after_hide_sizer,proportion=1,flag=wx.EXPAND| wx.ALL, border=10)
 
         send_before_hide_sizer=wx.BoxSizer(wx.HORIZONTAL)
         send_before_hide_label = wx.StaticText(panel, label="隐藏前发送暂停键（Beta）")
@@ -106,18 +107,22 @@ class SettingWindow(wx.Frame):
         self.send_before_hide_checkbox = wx.CheckBox(panel, -1, "")
         send_before_hide_sizer.Add(send_before_hide_label,proportion=1, flag=wx.EXPAND| wx.ALL)
         send_before_hide_sizer.Add(self.send_before_hide_checkbox,proportion=1, flag=wx.EXPAND| wx.ALL)
+        settings_checkbox_sizer.Add(send_before_hide_sizer, proportion=1,flag=wx.EXPAND| wx.ALL, border=10)
 
-        
         hide_current_sizer=wx.BoxSizer(wx.HORIZONTAL)
         hide_current_label = wx.StaticText(panel, label="同时隐藏当前活动窗口")
         self.hide_current_checkbox = wx.CheckBox(panel, -1, "")
         hide_current_sizer.Add(hide_current_label,proportion=1, flag=wx.EXPAND| wx.ALL)
         hide_current_sizer.Add(self.hide_current_checkbox,proportion=1, flag=wx.EXPAND| wx.ALL)
-        
-        settings_checkbox_sizer.Add(mute_after_hide_sizer,proportion=1,flag=wx.EXPAND| wx.ALL, border=10)
-        settings_checkbox_sizer.Add(send_before_hide_sizer, proportion=1,flag=wx.EXPAND| wx.ALL, border=10)
         settings_checkbox_sizer.Add(hide_current_sizer, proportion=1,flag=wx.EXPAND| wx.ALL, border=10)
-
+        
+        click_to_hide_sizer=wx.BoxSizer(wx.HORIZONTAL)
+        click_to_hide_label = wx.StaticText(panel, label="点击托盘图标切换隐藏状态")
+        self.click_to_hide_checkbox = wx.CheckBox(panel, -1, "")
+        click_to_hide_sizer.Add(click_to_hide_label,proportion=1, flag=wx.EXPAND| wx.ALL)
+        click_to_hide_sizer.Add(self.click_to_hide_checkbox,proportion=1, flag=wx.EXPAND| wx.ALL)
+        settings_checkbox_sizer.Add(click_to_hide_sizer, proportion=1,flag=wx.EXPAND| wx.ALL, border=10)
+        
         bottom_sizer.Add(settings_checkbox_sizer, proportion=1,flag=wx.EXPAND| wx.ALL, border=10)
         
         #设置提示
@@ -127,7 +132,7 @@ class SettingWindow(wx.Frame):
 
         # 创建按钮
         button_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.reset_btn = wx.Button(panel,size=(100,60), label="重置热键")
+        self.reset_btn = wx.Button(panel,size=(100,60), label="重置设置")
         self.save_btn = wx.Button(panel,size=(100,60), label="保存设置")
         button_sizer.Add(self.reset_btn, proportion=1, flag=wx.LEFT, border=20)
         button_sizer.Add(self.save_btn, proportion=1, flag=wx.RIGHT, border=20)
@@ -161,6 +166,7 @@ class SettingWindow(wx.Frame):
         self.mute_after_hide_checkbox.SetValue(Config.mute_after_hide)
         self.send_before_hide_checkbox.SetValue(Config.send_before_hide)
         self.hide_current_checkbox.SetValue(Config.hide_current)
+        self.click_to_hide_checkbox.SetValue(Config.click_to_hide)
         self.InsertList(Config.hide_binding,self.right_listctrl,True)
         self.RefreshLeftList()
 
@@ -217,6 +223,7 @@ class SettingWindow(wx.Frame):
         Config.mute_after_hide = self.mute_after_hide_checkbox.GetValue()
         Config.send_before_hide = self.send_before_hide_checkbox.GetValue()
         Config.hide_current = self.hide_current_checkbox.GetValue()
+        Config.click_to_hide = self.click_to_hide_checkbox.GetValue()
 
         Config.hide_binding = self.getAllItems(self.right_listctrl)
 
@@ -246,6 +253,12 @@ class SettingWindow(wx.Frame):
     def OnReset(self,e):
         self.hide_show_hotkey_text.SetValue("Ctrl+Q")
         self.close_hotkey_text.SetValue("Win+Esc")
+        self.mute_after_hide_checkbox.SetValue(True)
+        self.send_before_hide_checkbox.SetValue(False)
+        self.hide_current_checkbox.SetValue(True)
+        self.InsertList([],self.right_listctrl,True)
+        self.RefreshLeftList()
+        
         wx.MessageDialog(None, u"已重置选项，请保存设置以启用", u"Boss Key", wx.OK | wx.ICON_INFORMATION).ShowModal()
 
     def OnToggleCheck(self,e):
