@@ -57,9 +57,10 @@ SOFTWARE.
     first_start = not os.path.exists(config_path)
 
     SettingWindow=""
-    HotkeyWindow=""
     TaskBarIcon=""
     UpdateWindow=""
+
+    HotkeyListener=""
     
     recording_hotkey = False
     recorded_hotkey = None

@@ -182,7 +182,7 @@ class SettingWindow(wx.Frame):
 
         Config.save()
         try:
-            Config.HotkeyWindow.reBind()
+            Config.HotkeyListener.reBind()
             wx.MessageDialog(None, u"保存成功", u"Boss_Key", wx.OK | wx.ICON_INFORMATION).ShowModal()
         except:
             wx.MessageDialog(None, u"热键绑定失败，请重试", u"Boss Key", wx.OK | wx.ICON_ERROR).ShowModal()
@@ -281,7 +281,7 @@ class SettingWindow(wx.Frame):
 
     def recordHotkey(self, text_ctrl:wx.TextCtrl, btn:wx.Button):
         try:
-            Config.HotkeyWindow.stop()
+            Config.HotkeyListener.stop()
         except:
             pass
         btn.Disable()

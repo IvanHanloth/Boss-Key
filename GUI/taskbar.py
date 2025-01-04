@@ -39,8 +39,8 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
     
     def onLeftClick(self,e=''):
         if Config.click_to_hide:
-            if Config.HotkeyWindow!="":
-                Config.HotkeyWindow.onHide()
+            if Config.HotkeyListener!="":
+                Config.HotkeyListener.onHide()
 
     def onStartup(self,e):
         try:
@@ -61,7 +61,7 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
         about.AboutWindow().Show()
 
     def onExit(self,e):
-        Config.HotkeyWindow.Close()
+        Config.HotkeyListener.Close()
         sys.exit(0)
 
     def onUpdate(self,e):
