@@ -31,14 +31,12 @@ jobs:
         run: |
             python -m nuitka --windows-file-version=0.0.0.0 --show-progress --mingw64 --quiet --assume-yes-for-downloads --output-dir=out Boss-Key.py
 
-
       # 添加版本信息到可执行文件并重命名
       - name: Add version information and rename executable
         shell: pwsh
         run: |
           # 获取标签名作为版本号，去除前缀 refs/tags/
           $tag = 'Build-Test'
-  
           # 定义新的文件名
           $newExeName = "Boss-Key-$tag-onefile.exe"
           
