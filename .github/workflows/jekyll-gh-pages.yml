@@ -1,4 +1,4 @@
-name: Release Info Workflow and Deploy Jekyll with GitHub Pages
+name:  Update Releases and Pages
 
 on:
   push:

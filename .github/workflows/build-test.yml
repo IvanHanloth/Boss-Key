@@ -1,10 +1,13 @@
 name: Buildup Test
 
 on:
+  pull_request:
+    branches:
+      - dev
   workflow_dispatch:  # 允许手动触发工作流
 
 jobs:
-  build-and-release:
+  build-main-files:
     runs-on: windows-latest  # 使用最新的 Windows 运行器
 
     steps:
@@ -55,9 +58,27 @@ jobs:
           path: |
             out/Boss-Key.dist
 
+  deploy-test:
+    environment:
+      name: buildup-test
+    runs-on: windows-2022
+    needs: build-main-files
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Build-Test-Build
+          path: ./test
+
+      - name: Test Main Files
+        run: |
+          cd ./test
+          dir
+          ./Boss-Key.exe
+        
   compile-to-installer:
     runs-on: windows-latest
-    needs: build-and-release
+    needs: deploy-test
     steps:
     - name: Checkout code 
       uses: actions/checkout@v2
@@ -78,11 +99,11 @@ jobs:
     - name: Compile Installer
       run: |
         dir
-        .\ISCC.exe /DMyAppVersion='v2.0.0.0' Boss-Key.iss
+        .\ISCC.exe /DMyAppVersion='Build-Test' Boss-Key.iss
       working-directory: .github/inno-script
 
     - name: Upload Installer
       uses: actions/upload-artifact@v4
       with:
         name: Boss-Key-Installer
-        path: .github/inno-script/output/Boss-Key-v2.0.0.0-Installer.exe
+        path: .github/inno-script/output/Boss-Key-Build-Test-Installer.exe
