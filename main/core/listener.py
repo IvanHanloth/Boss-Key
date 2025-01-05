@@ -79,17 +79,18 @@ class HotkeyListener():
             inner=windows
 
         for i in outer:
-            flag=0
             for j in inner:
                 if tool.isSameWindow(i,j,False):
-                    flag=1
+                    if outer==Config.hide_binding: # 此时i是绑定的元素，j是窗口元素，需要隐藏j
+                        needHide.append(j['hwnd'])
+                    else:
+                        needHide.append(i['hwnd'])
                     break
-            if flag:
-                needHide.append(i['hwnd'])
 
         if Config.hide_current: # 插入当前窗口的句柄
             needHide.append(GetForegroundWindow())
 
+        needHide=tool.remove_duplicates(needHide) # 去重
         for i in needHide:
             if Config.send_before_hide:
                 time.sleep(0.2)

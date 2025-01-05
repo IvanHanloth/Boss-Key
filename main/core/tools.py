@@ -79,6 +79,21 @@ def changeMute(hwnd,flag=1):
     except:
         pass
 
+def remove_duplicates(input_list: list):
+    """
+    Remove duplicates from a list while preserving the order.
+    
+    input_list: list, the list from which to remove duplicates
+    returns: list, the list without duplicates
+    """
+    seen = set()
+    output_list = []
+    for item in input_list:
+        if item not in seen:
+            seen.add(item)
+            output_list.append(item)
+    return output_list
+
 def hwnd2processName(hwnd):
     """
     从窗口句柄获取进程名称
