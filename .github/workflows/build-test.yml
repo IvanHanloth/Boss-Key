@@ -3,7 +3,7 @@ name: Buildup Test
 on:
   pull_request:
     branches:
-      - dev
+      - main
   workflow_dispatch:  # 允许手动触发工作流
 
 jobs:
