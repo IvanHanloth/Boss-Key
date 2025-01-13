@@ -52,7 +52,12 @@ class APP(wx.App):
                 try:
                     process=psutil.Process(int(pid))
                     if process.is_running():
-                        return True
+                        this_name=psutil.Process(psutil.Process().pid).name() #获取当前进程名
+                        if this_name==process.name():
+                            return True
+                        else:
+                            self.write_pid(name)
+                            return False
                     else:
                         self.write_pid(name)
                         return False
