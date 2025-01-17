@@ -1,4 +1,4 @@
-from winreg import OpenKey,HKEY_CURRENT_USER,QueryValueEx,DeleteValue,CloseKey,KEY_ALL_ACCESS,SetValueEx,REG_SZ
+import winreg
 import wx.adv
 from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
 from core.config import Config
@@ -30,21 +30,48 @@ def check_update():
     
     return latest_release
 
-def modifyStartup(name: str, file_path: str):
-    key = OpenKey(HKEY_CURRENT_USER, "Software\Microsoft\Windows\CurrentVersion\Run", 0, KEY_ALL_ACCESS)
-    try:
-        existing_value, _ = QueryValueEx(key, name)
+def addStartup(program_name, program_path):
+    """
+    将程序添加到开机自启动
 
-        if existing_value == file_path:
-            DeleteValue(key, name)
-            CloseKey(key)
-            return "Removed"
-        else:
-            SetValueEx(key, name, 0, REG_SZ, file_path)
-            return "Added"
-    except WindowsError:
-        SetValueEx(key, name, 0, REG_SZ, file_path)
-        return "Added"
+    :param program_name: 注册表中的程序名称
+    :param program_path: 程序的完整路径
+    """
+    # 打开注册表中的自启动项
+    key = winreg.HKEY_CURRENT_USER
+    key_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
+    
+    try:
+        # 打开注册表键
+        registry_key = winreg.OpenKey(key, key_path, 0, winreg.KEY_WRITE)
+        # 设置注册表项
+        winreg.SetValueEx(registry_key, program_name, 0, winreg.REG_SZ, program_path)
+        # 关闭注册表键
+        winreg.CloseKey(registry_key)
+        return True
+    except WindowsError as e:
+        return False
+
+def removeStartup(program_name):
+    """
+    从开机自启动中移除程序
+
+    :param program_name: 注册表中的程序名称
+    """
+    # 打开注册表中的自启动项
+    key = winreg.HKEY_CURRENT_USER
+    key_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
+    
+    try:
+        # 打开注册表键
+        registry_key = winreg.OpenKey(key, key_path, 0, winreg.KEY_WRITE)
+        # 删除注册表项
+        winreg.DeleteValue(registry_key, program_name)
+        # 关闭注册表键
+        winreg.CloseKey(registry_key)
+        return True
+    except WindowsError as e:
+        return False
     
 def checkStartup(name: str, file_path: str):
     """
@@ -52,9 +79,9 @@ def checkStartup(name: str, file_path: str):
 
     returns True if the key exists and points to the correct file path
     """
-    key = OpenKey(HKEY_CURRENT_USER, "Software\Microsoft\Windows\CurrentVersion\Run", 0, KEY_ALL_ACCESS)
+    key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_READ)
     try:
-        existing_value, _ = QueryValueEx(key, name)
+        existing_value, _ = winreg.QueryValueEx(key, name)
 
         if existing_value == file_path:
             return True
@@ -78,6 +105,21 @@ def changeMute(hwnd,flag=1):
                 break
     except:
         pass
+
+def remove_duplicates(input_list: list):
+    """
+    Remove duplicates from a list while preserving the order.
+    
+    input_list: list, the list from which to remove duplicates
+    returns: list, the list without duplicates
+    """
+    seen = set()
+    output_list = []
+    for item in input_list:
+        if item not in seen:
+            seen.add(item)
+            output_list.append(item)
+    return output_list
 
 def hwnd2processName(hwnd):
     """

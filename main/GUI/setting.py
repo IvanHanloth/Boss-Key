@@ -177,6 +177,7 @@ class SettingWindow(wx.Frame):
         Config.send_before_hide = self.send_before_hide_checkbox.GetValue()
         Config.hide_current = self.hide_current_checkbox.GetValue()
         Config.click_to_hide = self.click_to_hide_checkbox.GetValue()
+        Config.HotkeyListener.ShowWindows()
 
         Config.hide_binding = self.getAllItems(self.right_listctrl)
 
