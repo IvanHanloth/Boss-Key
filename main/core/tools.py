@@ -1,5 +1,6 @@
 import winreg
 import wx.adv
+import wx
 from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
 from core.config import Config
 import win32process,win32gui
@@ -8,6 +9,9 @@ import core.vkMap as vkMap
 import datetime
 import requests
 import json
+import win32api
+import win32con
+import win32ui
 
 def check_update():
     requests.packages.urllib3.disable_warnings()
@@ -148,14 +152,40 @@ def hwnd2windowName(hwnd):
 
 def getAllWindows():
     # 获取所有窗口信息
-    def enumHandler(hwnd, windows:list):
+    def enumHandler(hwnd, windows: list):
         if win32gui.IsWindowVisible(hwnd):
             title = hwnd2windowName(hwnd)
-            
             pid = win32process.GetWindowThreadProcessId(hwnd)[1]
             process_name = psutil.Process(pid).name()
-            windows.append({'title': title, 'hwnd': int(hwnd), 'process': process_name, 'PID':int(pid)})
+            icon = getProcessIcon(hwnd)
+            windows.append({'title': title, 'hwnd': int(hwnd), 'process': process_name, 'PID': int(pid), 'icon': icon})
         return True
+
+    def getProcessIcon(hwnd):
+        hicon = win32gui.SendMessage(hwnd, win32con.WM_GETICON, win32con.ICON_SMALL, 0)
+        if hicon == 0:
+            hicon = win32gui.SendMessage(hwnd, win32con.WM_GETICON, win32con.ICON_BIG, 0)
+        if hicon == 0:
+            hicon = win32gui.GetClassLong(hwnd, win32con.GCL_HICON)
+        if hicon == 0:
+            hicon = win32gui.GetClassLong(hwnd, win32con.GCL_HICONSM)
+        print(hicon)
+        if hicon != 0:
+            hdc = win32ui.CreateDCFromHandle(win32gui.GetDC(hwnd))
+            hbmp = win32ui.CreateBitmap()
+            hbmp.CreateCompatibleBitmap(hdc, 32, 32)
+            hdc = hdc.CreateCompatibleDC()
+            hdc.SelectObject(hbmp)
+            hdc.DrawIcon((0, 0), hicon)
+            hdc.DeleteDC()
+            bmpinfo = hbmp.GetInfo()
+            bmpstr = hbmp.GetBitmapBits(True)
+            bmp =wx.Bitmap(32,32)
+            bmp.SetHandle(hbmp.GetHandle())
+            icon = wx.Icon()
+            icon.CopyFromBitmap(bmp)
+            return icon
+        return None
 
     windows = []
     win32gui.EnumWindows(enumHandler, windows)

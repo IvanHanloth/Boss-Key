@@ -37,8 +37,11 @@ class SettingWindow(wx.Frame):
         self.left_listctrl.InsertColumn(3, '进程PID', width=150)
         left_sizer.Add(self.left_listctrl, 1, wx.EXPAND | wx.ALL, 5)
         
+        # 创建图像列表并添加图标
+        self.image_list = wx.ImageList(16, 16)
+        self.left_listctrl.AssignImageList(self.image_list, wx.IMAGE_LIST_SMALL)
 
-        # 中键按钮
+        # 中间按钮
         middle_sizer = wx.BoxSizer(wx.VERTICAL)
         self.add_binding_btn = buttons.GenButton(panel, label="添加绑定-->")
         self.remove_binding_btn = buttons.GenButton(panel, label="<--删除绑定")
@@ -245,12 +248,16 @@ class SettingWindow(wx.Frame):
                     break
             if not flag:
                 list.append(window)
+        self.image_list.RemoveAll()
         self.InsertList(list,self.left_listctrl,True)
 
     def InsertList(self,data:list,contrl:wx.ListCtrl,clear=True):
         if clear:
             contrl.DeleteAllItems()
         for window in data:
+            if window.get('icon',None):
+                self.image_list.Add(window['icon'])
+
             index = contrl.InsertItem(contrl.GetItemCount(), window['title'])
             contrl.SetItem(index, 1, str(window['hwnd']))
             contrl.SetItem(index, 2, window['process'])
