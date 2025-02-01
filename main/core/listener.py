@@ -19,18 +19,9 @@ class HotkeyListener():
         self.listener = None
         self.reBind()
         threading.Thread(target=self.listenToQueue,daemon=True).start()
-    
-    def stop(self):
-        if self.listener is not None:
-            try:
-                self.listener.terminate()
-                self.listener.join()
-            except:
-                pass
-            finally:
-                self.listener = None
 
     def listenToQueue(self):
+        exit_flag = False
         while True:
             try:
                 msg = self.Queue.get()
@@ -38,8 +29,24 @@ class HotkeyListener():
                     Config.TaskBarIcon.ShowIcon()
                 elif msg == "hideTaskBarIcon":
                     Config.TaskBarIcon.HideIcon()
+                elif msg == "closeApp":
+                    print("收到关闭消息")
+                    tool.sendNotify("Boss Key已停止服务", "Boss Key已成功退出")
+                    self.ShowWindows()
+                    self.stop()
+                    try:
+                        Config.SettingWindow.Destroy()
+                        Config.TaskBarIcon.Destroy()
+                        Config.UpdateWindow.Destroy()
+                    except:
+                        pass
+                    exit_flag = True
+                    break
             except:
                 pass
+
+        if exit_flag:
+            sys.exit(0)
 
     def reBind(self):
         self.stop()
@@ -70,6 +77,7 @@ class HotkeyListener():
 
     def ShowWindows(self):
         # 显示窗口
+        Config.load()
         for i in Config.history:
             ShowWindow(i, SW_SHOW)
             if Config.mute_after_hide:
@@ -83,6 +91,8 @@ class HotkeyListener():
     
     def HideWindows(self):
         # 隐藏窗口
+
+        Config.load()
         needHide=[]
         windows=tool.getAllWindows()
         
@@ -123,8 +133,14 @@ class HotkeyListener():
         Config.save()
 
     def Close(self,e=""):
-        tool.sendNotify("Boss Key已停止服务", "Boss Key已成功退出")
-        self.ShowWindows()
-            
-        self.stop()
-        sys.exit(0)
+        self.Queue.put("closeApp")
+    
+    def stop(self):
+        if self.listener is not None:
+            try:
+                self.listener.terminate()
+                self.listener.join()
+            except:
+                pass
+            finally:
+                self.listener = None
