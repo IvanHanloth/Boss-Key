@@ -75,7 +75,7 @@ class SettingWindow(wx.Frame):
         bottom_staticbox = wx.StaticBox(panel, label="其他设置")
         bottom_sizer = wx.StaticBoxSizer(bottom_staticbox, wx.VERTICAL)
 
-        hotkey_sizer=wx.BoxSizer(wx.HORIZONTAL)
+        hotkey_sizer=wx.GridSizer(rows=0, cols=2, gap=(10, 10))
 
         #设置隐显窗口热键
         hide_show_hotkey_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -97,10 +97,10 @@ class SettingWindow(wx.Frame):
         close_hotkey_sizer.Add(self.close_hotkey_btn, proportion=1, flag=wx.EXPAND| wx.ALL, border=10)
         hotkey_sizer.Add(close_hotkey_sizer, proportion=1, flag=wx.EXPAND| wx.ALL, border=10)
         
-        bottom_sizer.Add(hotkey_sizer,proportion=1, flag=wx.EXPAND| wx.ALL)
+        bottom_sizer.Add(hotkey_sizer, flag=wx.EXPAND| wx.ALL)
 
         # 创建复选框
-        settings_checkbox_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        settings_checkbox_sizer = wx.GridSizer(rows=0, cols=3, gap=(10, 10))
 
         mute_after_hide_sizer=wx.BoxSizer(wx.HORIZONTAL)
         mute_after_hide_label = wx.StaticText(panel, label="隐藏窗口后静音")
@@ -130,8 +130,15 @@ class SettingWindow(wx.Frame):
         click_to_hide_sizer.Add(click_to_hide_label,proportion=1, flag=wx.EXPAND| wx.ALL)
         click_to_hide_sizer.Add(self.click_to_hide_checkbox,proportion=1, flag=wx.EXPAND| wx.ALL)
         settings_checkbox_sizer.Add(click_to_hide_sizer, proportion=1,flag=wx.EXPAND| wx.ALL, border=10)
+
+        hide_icon_after_hide_sizer=wx.BoxSizer(wx.HORIZONTAL)
+        hide_icon_after_hide_label = wx.StaticText(panel, label="隐藏窗口后隐藏托盘图标")
+        self.hide_icon_after_hide_checkbox = wx.CheckBox(panel, -1, "")
+        hide_icon_after_hide_sizer.Add(hide_icon_after_hide_label,proportion=1, flag=wx.EXPAND| wx.ALL)
+        hide_icon_after_hide_sizer.Add(self.hide_icon_after_hide_checkbox,proportion=1, flag=wx.EXPAND| wx.ALL)
+        settings_checkbox_sizer.Add(hide_icon_after_hide_sizer, proportion=1,flag=wx.EXPAND| wx.ALL, border=10)
         
-        bottom_sizer.Add(settings_checkbox_sizer, proportion=1,flag=wx.EXPAND| wx.ALL, border=10)
+        bottom_sizer.Add(settings_checkbox_sizer, flag=wx.EXPAND| wx.ALL, border=10)
         
         #设置提示
         if Config.first_start:
@@ -175,6 +182,7 @@ class SettingWindow(wx.Frame):
         self.send_before_hide_checkbox.SetValue(Config.send_before_hide)
         self.hide_current_checkbox.SetValue(Config.hide_current)
         self.click_to_hide_checkbox.SetValue(Config.click_to_hide)
+        self.hide_icon_after_hide_checkbox.SetValue(Config.hide_icon_after_hide)
         self.InsertList(Config.hide_binding,self.right_listctrl,True)
         self.RefreshLeftList()
 
@@ -185,6 +193,7 @@ class SettingWindow(wx.Frame):
         Config.send_before_hide = self.send_before_hide_checkbox.GetValue()
         Config.hide_current = self.hide_current_checkbox.GetValue()
         Config.click_to_hide = self.click_to_hide_checkbox.GetValue()
+        Config.hide_icon_after_hide = self.hide_icon_after_hide_checkbox.GetValue()
         Config.HotkeyListener.ShowWindows()
 
         Config.hide_binding = self.getAllItems(self.right_listctrl)
