@@ -75,3 +75,9 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
         else:
             Config.UpdateWindow=about.UpdateWindow()
             Config.UpdateWindow.Show()
+
+    def HideIcon(self):
+        wx.CallAfter(self.RemoveIcon)
+
+    def ShowIcon(self):
+        wx.CallAfter(self.SetIcon, self.Icon, 'Boss Key')
