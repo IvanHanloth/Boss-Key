@@ -204,7 +204,10 @@ def isSameWindow(w1:dict,w2:dict,strict=False):
 def sendNotify(title,message):
     notify = wx.adv.NotificationMessage(title=title,message=message,parent=None)
     notify.SetIcon(wx.Icon(wx.Image(Config.icon).ConvertToBitmap()))
-    notify.UseTaskBarIcon(Config.TaskBarIcon)
+    try:
+        notify.UseTaskBarIcon(Config.TaskBarIcon)
+    except:
+        pass
     notify.Show(timeout=3) # 1 for short timeout, 100 for long timeout
 
 def keyMux(key):
