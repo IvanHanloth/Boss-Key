@@ -77,6 +77,7 @@ class HotkeyListener():
 
     def ShowWindows(self):
         # 显示窗口
+        Config.load()
         for i in Config.history:
             ShowWindow(i, SW_SHOW)
             if Config.mute_after_hide:
@@ -90,6 +91,8 @@ class HotkeyListener():
     
     def HideWindows(self):
         # 隐藏窗口
+
+        Config.load()
         needHide=[]
         windows=tool.getAllWindows()
         
