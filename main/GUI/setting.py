@@ -35,7 +35,11 @@ class SettingWindow(wx.Frame):
         self.left_listctrl.InsertColumn(1, '窗口句柄', width=100)
         self.left_listctrl.InsertColumn(2, '启动进程', width=150)
         self.left_listctrl.InsertColumn(3, '进程PID', width=150)
+        self.left_listctrl.Bind(wx.EVT_LIST_COL_CLICK, self.OnLeftListColClick)  # 绑定事件
+        self.left_select_all_checkbox = wx.CheckBox(panel, label="全选")
+        self.left_select_all_checkbox.Bind(wx.EVT_CHECKBOX, self.OnLeftSelectAll)
         left_sizer.Add(self.left_listctrl, 1, wx.EXPAND | wx.ALL, 5)
+        left_sizer.Add(self.left_select_all_checkbox, 0, wx.EXPAND | wx.ALL, 5)
         
 
         # 中键按钮
@@ -56,7 +60,11 @@ class SettingWindow(wx.Frame):
         self.right_listctrl.InsertColumn(1, '窗口句柄', width=100)
         self.right_listctrl.InsertColumn(2, '启动进程', width=150)
         self.right_listctrl.InsertColumn(3, '进程PID', width=150)
+        self.right_listctrl.Bind(wx.EVT_LIST_COL_CLICK, self.OnRightListColClick)  # 绑定事件
+        self.right_select_all_checkbox = wx.CheckBox(panel, label="全选")
+        self.right_select_all_checkbox.Bind(wx.EVT_CHECKBOX, self.OnRightSelectAll)
         right_sizer.Add(self.right_listctrl, 1, wx.EXPAND | wx.ALL, 5)
+        right_sizer.Add(self.right_select_all_checkbox, 0, wx.EXPAND | wx.ALL, 5)
 
         # 加到上方的sizer中
         top_sizer.Add(left_sizer, 1, wx.EXPAND | wx.ALL, 5)
@@ -294,5 +302,27 @@ class SettingWindow(wx.Frame):
         btn.SetLabel("录制热键")
         if record.RecordedHotkey.confirm:
             text_ctrl.SetValue(record.RecordedHotkey.final_key)
+
+    def OnLeftListColClick(self, event):
+        self.ToggleAllItems(self.left_listctrl)
+
+    def OnRightListColClick(self, event):
+        self.ToggleAllItems(self.right_listctrl)
+
+    def ToggleAllItems(self, listctrl):
+        all_checked = all(listctrl.IsItemChecked(i) for i in range(listctrl.GetItemCount()))
+        for i in range(listctrl.GetItemCount()):
+            listctrl.CheckItem(i, not all_checked)
+
+    def OnLeftSelectAll(self, event):
+        self.SelectAllItems(self.left_listctrl, self.left_select_all_checkbox)
+
+    def OnRightSelectAll(self, event):
+        self.SelectAllItems(self.right_listctrl, self.right_select_all_checkbox)
+
+    def SelectAllItems(self, listctrl, checkbox):
+        check = checkbox.GetValue()
+        for i in range(listctrl.GetItemCount()):
+            listctrl.CheckItem(i, check)
 
 
