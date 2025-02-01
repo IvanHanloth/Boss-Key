@@ -4,7 +4,7 @@ import json
 from .icon import get_icon
 from configparser import ConfigParser
 from io import BytesIO
-
+ 
 class Config:
     AppName = "Boss Key"
     AppVersion = "v2.0.1.0"
@@ -61,7 +61,7 @@ SOFTWARE.
     TaskBarIcon=""
     UpdateWindow=""
 
-    HotkeyListener=""
+    HotkeyListener= ""
     
     recording_hotkey = False
     recorded_hotkey = None
