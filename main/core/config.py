@@ -47,6 +47,7 @@ SOFTWARE.
     hide_current=True
 
     click_to_hide = True
+    hide_icon_after_hide = False
 
     hide_binding = []
     
@@ -83,6 +84,7 @@ SOFTWARE.
         Config.mute_after_hide = config.get("setting", {}).get("mute_after_hide", True)
         Config.send_before_hide = config.get("setting", {}).get("send_before_hide", False)
         Config.hide_current = config.get("setting", {}).get("hide_current", True)
+        Config.hide_icon_after_hide = config.get("setting", {}).get("hide_icon_after_hide", False)
         
         Config.click_to_hide= config.get("setting", {}).get("click_to_hide", True)
 
@@ -108,7 +110,8 @@ SOFTWARE.
                 'mute_after_hide': Config.mute_after_hide,
                 'send_before_hide': Config.send_before_hide,
                 'hide_current': Config.hide_current,
-                'click_to_hide': Config.click_to_hide
+                'click_to_hide': Config.click_to_hide,
+                'hide_icon_after_hide': Config.hide_icon_after_hide
             },
             "hide_binding" : Config.hide_binding
         }
