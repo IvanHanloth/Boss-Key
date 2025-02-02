@@ -7,10 +7,10 @@ from io import BytesIO
  
 class Config:
     AppName = "Boss Key"
-    AppVersion = "v2.0.1.0"
-    AppReleaseDate = "2025-1-17"
+    AppVersion = "v2.0.2.0"
+    AppReleaseDate = "2025-02-02"
     AppAuthor = "IvanHanloth"
-    AppDescription = "老板来了？快用Boss-Key一键隐藏静音当前窗口！上班摸鱼必备神器"
+    AppDescription = "老板来了？快用Boss-Key老板键一键隐藏静音当前窗口！上班摸鱼必备神器"
     AppCopyRight = "Copyright © 2022-2025 Ivan Hanloth All Rights Reserved."
     AppWebsite = "https://github.com/IvanHanloth/Boss-Key"
     AppLicense = """MIT License
@@ -71,13 +71,15 @@ SOFTWARE.
         if os.path.exists(os.path.join(os.getcwd(), "config.ini")):
             Config.import_from_ini()
             
-
         if Config.first_start:
             Config.save()
             return
 
         with open(Config.config_path, 'r', encoding='utf-8') as f:
-            config = json.load(f)
+            try:
+                config = json.load(f)
+            except:
+                config = {} # 避免出现配置文件损坏导致程序无法启动
 
         Config.history = config.get("history", [])
 
