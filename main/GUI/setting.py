@@ -235,6 +235,7 @@ class SettingWindow(wx.Frame):
                 treelist.CheckItem(parent, wx.CHK_CHECKED)
             elif treelist.AreAllChildrenInState(parent, wx.CHK_UNCHECKED):
                 treelist.CheckItem(parent, wx.CHK_UNCHECKED)
+
     def OnSendBeforeHide(self,e):
         if self.send_before_hide_checkbox.GetValue():
             wx.MessageDialog(None, u"隐藏窗口前向被隐藏的窗口发送空格，用于暂停视频等。启用此功能可能会延迟窗口的隐藏", u"Boss Key", wx.OK | wx.ICON_INFORMATION).ShowModal()
@@ -275,8 +276,9 @@ class SettingWindow(wx.Frame):
             treelist.SetItemText(item, 1, str(window['hwnd']))
             treelist.SetItemText(item, 2, str(window['PID']))
             treelist.SetItemData(item, {"title":window['title'],"hwnd": window['hwnd'], "process": window['process'], "PID": window['PID']})
-            treelist.CheckItem(item)
         treelist.Expand(root)
+        for process in process_map:
+            treelist.Expand(process_map[process])
 
     def getAllItems(self, treelist: dataview.TreeListCtrl):
         items = []
