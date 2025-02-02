@@ -71,13 +71,15 @@ SOFTWARE.
         if os.path.exists(os.path.join(os.getcwd(), "config.ini")):
             Config.import_from_ini()
             
-
         if Config.first_start:
             Config.save()
             return
 
         with open(Config.config_path, 'r', encoding='utf-8') as f:
-            config = json.load(f)
+            try:
+                config = json.load(f)
+            except:
+                config = {} # 避免出现配置文件损坏导致程序无法启动
 
         Config.history = config.get("history", [])
 
