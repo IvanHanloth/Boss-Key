@@ -75,9 +75,10 @@ class HotkeyListener():
         else:
             self.ShowWindows()
 
-    def ShowWindows(self):
+    def ShowWindows(self,load=True):
         # 显示窗口
-        Config.load()
+        if load:
+            Config.load()
         for i in Config.history:
             ShowWindow(i, SW_SHOW)
             if Config.mute_after_hide:
