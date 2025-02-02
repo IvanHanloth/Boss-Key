@@ -1,7 +1,10 @@
 import wx
+import wx.dataview as dataview
+import wx.dataview
 from core.config import Config
 import GUI.record as record
 import core.tools as tool
+import json
 import wx.lib.buttons as buttons
 
 class SettingWindow(wx.Frame):
@@ -13,7 +16,7 @@ class SettingWindow(wx.Frame):
 
         self.Bind_EVT()
         self.SetData()
-        self.SetSize((1500, 700))
+        self.SetSize((1500, 800))
 
         self.Center()
 
@@ -29,17 +32,11 @@ class SettingWindow(wx.Frame):
         # 左边列表
         left_staticbox = wx.StaticBox(panel, label="现有窗口进程")
         left_sizer = wx.StaticBoxSizer(left_staticbox, wx.VERTICAL)
-        self.left_listctrl = wx.ListCtrl(panel, style=wx.LC_REPORT)
-        self.left_listctrl.EnableCheckBoxes(True)
-        self.left_listctrl.InsertColumn(0, '窗口标题', width=150)
-        self.left_listctrl.InsertColumn(1, '窗口句柄', width=100)
-        self.left_listctrl.InsertColumn(2, '启动进程', width=150)
-        self.left_listctrl.InsertColumn(3, '进程PID', width=150)
-        self.left_listctrl.Bind(wx.EVT_LIST_COL_CLICK, self.OnLeftListColClick)  # 绑定事件
-        self.left_select_all_checkbox = wx.CheckBox(panel, label="全选")
-        self.left_select_all_checkbox.Bind(wx.EVT_CHECKBOX, self.OnLeftSelectAll)
-        left_sizer.Add(self.left_listctrl, 1, wx.EXPAND | wx.ALL, 5)
-        left_sizer.Add(self.left_select_all_checkbox, 0, wx.EXPAND | wx.ALL, 5)
+        self.left_treelist = dataview.TreeListCtrl(panel, style=wx.dataview.TL_CHECKBOX)
+        self.left_treelist.AppendColumn('窗口标题', width=300)
+        self.left_treelist.AppendColumn('窗口句柄', width=100)
+        self.left_treelist.AppendColumn('进程PID', width=150)
+        left_sizer.Add(self.left_treelist, 1, wx.EXPAND | wx.ALL, 5)
         
 
         # 中键按钮
@@ -54,17 +51,11 @@ class SettingWindow(wx.Frame):
         # 右边列表
         right_staticbox = wx.StaticBox(panel, label="已绑定进程")
         right_sizer = wx.StaticBoxSizer(right_staticbox, wx.VERTICAL)
-        self.right_listctrl = wx.ListCtrl(panel, style=wx.LC_REPORT)
-        self.right_listctrl.EnableCheckBoxes(True)
-        self.right_listctrl.InsertColumn(0, '窗口标题', width=150)
-        self.right_listctrl.InsertColumn(1, '窗口句柄', width=100)
-        self.right_listctrl.InsertColumn(2, '启动进程', width=150)
-        self.right_listctrl.InsertColumn(3, '进程PID', width=150)
-        self.right_listctrl.Bind(wx.EVT_LIST_COL_CLICK, self.OnRightListColClick)  # 绑定事件
-        self.right_select_all_checkbox = wx.CheckBox(panel, label="全选")
-        self.right_select_all_checkbox.Bind(wx.EVT_CHECKBOX, self.OnRightSelectAll)
-        right_sizer.Add(self.right_listctrl, 1, wx.EXPAND | wx.ALL, 5)
-        right_sizer.Add(self.right_select_all_checkbox, 0, wx.EXPAND | wx.ALL, 5)
+        self.right_treelist = dataview.TreeListCtrl(panel, style=wx.dataview.TL_CHECKBOX)
+        self.right_treelist.AppendColumn('窗口标题', width=300)
+        self.right_treelist.AppendColumn('窗口句柄', width=100)
+        self.right_treelist.AppendColumn('进程PID', width=150)
+        right_sizer.Add(self.right_treelist, 1, wx.EXPAND | wx.ALL, 5)
 
         # 加到上方的sizer中
         top_sizer.Add(left_sizer, 1, wx.EXPAND | wx.ALL, 5)
@@ -169,8 +160,10 @@ class SettingWindow(wx.Frame):
         self.refresh_btn.Bind(wx.EVT_BUTTON, self.RefreshLeftList)
         self.add_binding_btn.Bind(wx.EVT_BUTTON, self.OnAddBinding)
         self.remove_binding_btn.Bind(wx.EVT_BUTTON, self.OnRemoveBinding)
-        self.left_listctrl.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnToggleCheck)
-        self.right_listctrl.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnToggleCheck)
+        # self.left_treelist.Bind(dataview.EVT_TREELIST_SELECTION_CHANGED, self.OnToggleCheck)
+        # self.right_treelist.Bind(dataview.EVT_TREELIST_SELECTION_CHANGED, self.OnToggleCheck)
+        self.left_treelist.Bind(dataview.EVT_TREELIST_ITEM_CHECKED, self.OnToggleCheck)
+        self.right_treelist.Bind(dataview.EVT_TREELIST_ITEM_CHECKED, self.OnToggleCheck)
         
         self.Bind(wx.EVT_CLOSE,self.OnClose)
 
@@ -183,7 +176,7 @@ class SettingWindow(wx.Frame):
         self.hide_current_checkbox.SetValue(Config.hide_current)
         self.click_to_hide_checkbox.SetValue(Config.click_to_hide)
         self.hide_icon_after_hide_checkbox.SetValue(Config.hide_icon_after_hide)
-        self.InsertList(Config.hide_binding,self.right_listctrl,True)
+        self.InsertTreeList(Config.hide_binding, self.right_treelist, True)
         self.RefreshLeftList()
 
     def OnSave(self,e):
@@ -196,30 +189,26 @@ class SettingWindow(wx.Frame):
         Config.hide_icon_after_hide = self.hide_icon_after_hide_checkbox.GetValue()
         Config.HotkeyListener.ShowWindows()
 
-        Config.hide_binding = self.getAllItems(self.right_listctrl)
+        Config.hide_binding = self.getAllItems(self.right_treelist)
 
         Config.save()
         try:
             Config.HotkeyListener.reBind()
-            wx.MessageDialog(None, u"保存成功", u"Boss_Key", wx.OK | wx.ICON_INFORMATION).ShowModal()
+            wx.MessageDialog(None, u"保存成功", u"Boss Key", wx.OK | wx.ICON_INFORMATION).ShowModal()
         except:
             wx.MessageDialog(None, u"热键绑定失败，请重试", u"Boss Key", wx.OK | wx.ICON_ERROR).ShowModal()
         
     def OnAddBinding(self,e):
-        itemConut = self.left_listctrl.GetItemCount()
-        left_checked=self.getSelectedItems(self.left_listctrl)
-        self.InsertList(left_checked,self.right_listctrl,False)
-        for i in range(itemConut-1,-1,-1):
-            if self.left_listctrl.IsItemChecked(i):
-                self.left_listctrl.DeleteItem(i)
+        left_checked = self.getSelectedItems(self.left_treelist)
+        self.InsertTreeList(left_checked, self.right_treelist, False)
+        for item in left_checked:
+            self.left_treelist.DeleteItem(item)
 
     def OnRemoveBinding(self,e):
-        itemConut = self.left_listctrl.GetItemCount()
-        right_checked=self.getSelectedItems(self.right_listctrl)
-        self.InsertList(right_checked,self.left_listctrl,False)
-        for i in range(itemConut-1,-1,-1):
-            if self.right_listctrl.IsItemChecked(i):
-                self.right_listctrl.DeleteItem(i)
+        right_checked = self.getSelectedItems(self.right_treelist)
+        self.InsertTreeList(right_checked, self.left_treelist, False)
+        for item in right_checked:
+            self.right_treelist.DeleteItem(item)
 
     def OnReset(self,e):
         self.hide_show_hotkey_text.SetValue("Ctrl+Q")
@@ -227,16 +216,25 @@ class SettingWindow(wx.Frame):
         self.mute_after_hide_checkbox.SetValue(True)
         self.send_before_hide_checkbox.SetValue(False)
         self.hide_current_checkbox.SetValue(True)
-        self.InsertList([],self.right_listctrl,True)
+        self.InsertTreeList([],self.right_treelist,True)
         self.RefreshLeftList()
         
         wx.MessageDialog(None, u"已重置选项，请保存设置以启用", u"Boss Key", wx.OK | wx.ICON_INFORMATION).ShowModal()
 
-    def OnToggleCheck(self,e):
-        listctrl = e.GetEventObject()
-        index = e.GetIndex()
-        listctrl.CheckItem(index, not listctrl.IsItemChecked(index))
-
+    def OnToggleCheck(self, e):
+        treelist = e.GetEventObject()
+        item = e.GetItem()
+        is_checked = treelist.GetCheckedState(item)
+        treelist.CheckItemRecursively(item, is_checked)
+        # 检查父级是否需要修改状态
+        parent = treelist.GetItemParent(item)
+        if parent == treelist.GetRootItem():
+            return
+        else:
+            if treelist.AreAllChildrenInState(parent, wx.CHK_CHECKED):
+                treelist.CheckItem(parent, wx.CHK_CHECKED)
+            elif treelist.AreAllChildrenInState(parent, wx.CHK_UNCHECKED):
+                treelist.CheckItem(parent, wx.CHK_UNCHECKED)
     def OnSendBeforeHide(self,e):
         if self.send_before_hide_checkbox.GetValue():
             wx.MessageDialog(None, u"隐藏窗口前向被隐藏的窗口发送空格，用于暂停视频等。启用此功能可能会延迟窗口的隐藏", u"Boss Key", wx.OK | wx.ICON_INFORMATION).ShowModal()
@@ -252,7 +250,7 @@ class SettingWindow(wx.Frame):
     
     def RefreshLeftList(self,e=None):
         windows=tool.getAllWindows()
-        right=self.getAllItems(self.right_listctrl)
+        right=self.getAllItems(self.right_treelist)
         list=[]
         for window in windows:
             flag=0
@@ -262,39 +260,48 @@ class SettingWindow(wx.Frame):
                     break
             if not flag:
                 list.append(window)
-        self.InsertList(list,self.left_listctrl,True)
+        self.InsertTreeList(list,self.left_treelist,True)
 
-    def InsertList(self,data:list,contrl:wx.ListCtrl,clear=True):
+    def InsertTreeList(self, data: list, treelist: dataview.TreeListCtrl, clear=True):
         if clear:
-            contrl.DeleteAllItems()
+            treelist.DeleteAllItems()
+        root = treelist.GetRootItem()
+        process_map = {}
         for window in data:
-            index = contrl.InsertItem(contrl.GetItemCount(), window['title'])
-            contrl.SetItem(index, 1, str(window['hwnd']))
-            contrl.SetItem(index, 2, window['process'])
-            contrl.SetItem(index, 3, str(window['PID']))
-            contrl.SetItemData(index, int(window['hwnd']))
+            process = window['process']
+            if process not in process_map:
+                process_map[process] = treelist.AppendItem(root, process)
+            item = treelist.AppendItem(process_map[process], window['title'])
+            treelist.SetItemText(item, 1, str(window['hwnd']))
+            treelist.SetItemText(item, 2, str(window['PID']))
+            treelist.SetItemData(item, {"title":window['title'],"hwnd": window['hwnd'], "process": window['process'], "PID": window['PID']})
+            treelist.CheckItem(item)
+        treelist.Expand(root)
 
-    def getAllItems(self, listctrl:wx.ListCtrl):
+    def getAllItems(self, treelist: dataview.TreeListCtrl):
         items = []
-        for i in range(listctrl.GetItemCount()):
-            items.append({
-                "title":listctrl.GetItemText(i,0),
-                "hwnd":int(listctrl.GetItemText(i,1)),
-                "process":listctrl.GetItemText(i,2),
-                "PID":int(listctrl.GetItemText(i,3))
-            })
+        item = treelist.GetFirstItem()
+        item_data = treelist.GetItemData(item)
+        if item_data is None or not item_data or not item.IsOk():
+            return items
+        else:
+            items.append(item_data)
+        while True:
+            item = treelist.GetNextItem(-1, item)
+            if not item.IsOk():
+                break
+            data = treelist.GetItemData(item)
+            if data is not None and data:
+                items.append(data)
         return items
-    
-    def getSelectedItems(self, listctrl:wx.ListCtrl):
+
+    def getSelectedItems(self, treelist: dataview.TreeListCtrl):
         items = []
-        for i in range(listctrl.GetItemCount()):
-            if listctrl.IsItemChecked(i):
-                items.append({
-                    "title":listctrl.GetItemText(i,0),
-                    "hwnd":int(listctrl.GetItemText(i,1)),
-                    "process":listctrl.GetItemText(i,2),
-                    "PID":int(listctrl.GetItemText(i,3))
-                })
+        root = treelist.GetRootItem()
+        for process_item in treelist.GetChildren(root):
+            for window_item in treelist.GetChildren(process_item):
+                if treelist.GetCheckedState(window_item):
+                    items.append(treelist.GetItemData(window_item))
         return items
 
     def recordHotkey(self, text_ctrl:wx.TextCtrl, btn:wx.Button):
@@ -311,27 +318,5 @@ class SettingWindow(wx.Frame):
         btn.SetLabel("录制热键")
         if record.RecordedHotkey.confirm:
             text_ctrl.SetValue(record.RecordedHotkey.final_key)
-
-    def OnLeftListColClick(self, event):
-        self.ToggleAllItems(self.left_listctrl)
-
-    def OnRightListColClick(self, event):
-        self.ToggleAllItems(self.right_listctrl)
-
-    def ToggleAllItems(self, listctrl):
-        all_checked = all(listctrl.IsItemChecked(i) for i in range(listctrl.GetItemCount()))
-        for i in range(listctrl.GetItemCount()):
-            listctrl.CheckItem(i, not all_checked)
-
-    def OnLeftSelectAll(self, event):
-        self.SelectAllItems(self.left_listctrl, self.left_select_all_checkbox)
-
-    def OnRightSelectAll(self, event):
-        self.SelectAllItems(self.right_listctrl, self.right_select_all_checkbox)
-
-    def SelectAllItems(self, listctrl, checkbox):
-        check = checkbox.GetValue()
-        for i in range(listctrl.GetItemCount()):
-            listctrl.CheckItem(i, check)
 
 
