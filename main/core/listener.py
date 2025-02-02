@@ -5,6 +5,7 @@ from win32con import SW_HIDE, SW_SHOW
 import sys
 from pynput import keyboard
 import multiprocessing
+import threading
 import time
 
 class HotkeyListener():
@@ -14,25 +15,44 @@ class HotkeyListener():
         except:
             pass
         tool.sendNotify("Boss Key正在运行！", "Boss Key正在为您服务，您可通过托盘图标看到我")
+        self.Queue = multiprocessing.Queue()
         self.listener = None
         self.reBind()
-    
-    def stop(self):
-        if self.listener is not None:
+        threading.Thread(target=self.listenToQueue,daemon=True).start()
+
+    def listenToQueue(self):
+        exit_flag = False
+        while True:
             try:
-                self.listener.terminate()
-                self.listener.join()
+                msg = self.Queue.get()
+                if msg == "showTaskBarIcon":
+                    Config.TaskBarIcon.ShowIcon()
+                elif msg == "hideTaskBarIcon":
+                    Config.TaskBarIcon.HideIcon()
+                elif msg == "closeApp":
+                    print("收到关闭消息")
+                    tool.sendNotify("Boss Key已停止服务", "Boss Key已成功退出")
+                    self.ShowWindows()
+                    self.stop()
+                    try:
+                        Config.SettingWindow.Destroy()
+                        Config.TaskBarIcon.Destroy()
+                        Config.UpdateWindow.Destroy()
+                    except:
+                        pass
+                    exit_flag = True
+                    break
             except:
                 pass
-            finally:
-                self.listener = None
-    
+
+        if exit_flag:
+            sys.exit(0)
+
     def reBind(self):
         self.stop()
         self.BindHotKey()
     
     def ListenerProcess(self,hotkey):
-        print(hotkey)
         with keyboard.GlobalHotKeys(hotkey) as listener:
             while True: #避免意外退出
                 listener.join()
@@ -55,18 +75,25 @@ class HotkeyListener():
         else:
             self.ShowWindows()
 
-    def ShowWindows(self):
+    def ShowWindows(self,load=True):
         # 显示窗口
+        if load:
+            Config.load()
         for i in Config.history:
             ShowWindow(i, SW_SHOW)
             if Config.mute_after_hide:
                 tool.changeMute(i,0)
+
+        if Config.hide_icon_after_hide:
+            self.Queue.put("showTaskBarIcon")
                 
         Config.times = 1
         Config.save()
     
     def HideWindows(self):
         # 隐藏窗口
+
+        Config.load()
         needHide=[]
         windows=tool.getAllWindows()
         
@@ -102,13 +129,19 @@ class HotkeyListener():
 
         Config.history=needHide
         Config.times = 0
+        if Config.hide_icon_after_hide:
+            self.Queue.put("hideTaskBarIcon")
         Config.save()
 
     def Close(self,e=""):
-        tool.sendNotify("Boss Key已停止服务", "Boss Key已成功退出")
-        self.ShowWindows()
-            
-        self.stop()
-        Config.TaskBarIcon.Destroy()
-        Config.SettingWindow.Destroy()
-        sys.exit(0)
+        self.Queue.put("closeApp")
+    
+    def stop(self):
+        if self.listener is not None:
+            try:
+                self.listener.terminate()
+                self.listener.join()
+            except:
+                pass
+            finally:
+                self.listener = None

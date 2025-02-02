@@ -4,13 +4,13 @@ import json
 from .icon import get_icon
 from configparser import ConfigParser
 from io import BytesIO
-
+ 
 class Config:
     AppName = "Boss Key"
-    AppVersion = "v2.0.1.0"
-    AppReleaseDate = "2025-1-17"
+    AppVersion = "v2.0.2.0"
+    AppReleaseDate = "2025-02-02"
     AppAuthor = "IvanHanloth"
-    AppDescription = "老板来了？快用Boss-Key一键隐藏静音当前窗口！上班摸鱼必备神器"
+    AppDescription = "老板来了？快用Boss-Key老板键一键隐藏静音当前窗口！上班摸鱼必备神器"
     AppCopyRight = "Copyright © 2022-2025 Ivan Hanloth All Rights Reserved."
     AppWebsite = "https://github.com/IvanHanloth/Boss-Key"
     AppLicense = """MIT License
@@ -47,6 +47,7 @@ SOFTWARE.
     hide_current=True
 
     click_to_hide = True
+    hide_icon_after_hide = False
 
     hide_binding = []
     
@@ -60,7 +61,7 @@ SOFTWARE.
     TaskBarIcon=""
     UpdateWindow=""
 
-    HotkeyListener=""
+    HotkeyListener= ""
     
     recording_hotkey = False
     recorded_hotkey = None
@@ -70,19 +71,22 @@ SOFTWARE.
         if os.path.exists(os.path.join(os.getcwd(), "config.ini")):
             Config.import_from_ini()
             
-
         if Config.first_start:
             Config.save()
             return
 
         with open(Config.config_path, 'r', encoding='utf-8') as f:
-            config = json.load(f)
+            try:
+                config = json.load(f)
+            except:
+                config = {} # 避免出现配置文件损坏导致程序无法启动
 
         Config.history = config.get("history", [])
 
         Config.mute_after_hide = config.get("setting", {}).get("mute_after_hide", True)
         Config.send_before_hide = config.get("setting", {}).get("send_before_hide", False)
         Config.hide_current = config.get("setting", {}).get("hide_current", True)
+        Config.hide_icon_after_hide = config.get("setting", {}).get("hide_icon_after_hide", False)
         
         Config.click_to_hide= config.get("setting", {}).get("click_to_hide", True)
 
@@ -108,7 +112,8 @@ SOFTWARE.
                 'mute_after_hide': Config.mute_after_hide,
                 'send_before_hide': Config.send_before_hide,
                 'hide_current': Config.hide_current,
-                'click_to_hide': Config.click_to_hide
+                'click_to_hide': Config.click_to_hide,
+                'hide_icon_after_hide': Config.hide_icon_after_hide
             },
             "hide_binding" : Config.hide_binding
         }
