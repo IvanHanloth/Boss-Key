@@ -189,7 +189,7 @@ class SettingWindow(wx.Frame):
         Config.hide_icon_after_hide = self.hide_icon_after_hide_checkbox.GetValue()
         Config.HotkeyListener.ShowWindows()
 
-        Config.hide_binding = self.getAllItems(self.right_treelist)
+        Config.hide_binding = self.ItemsData(self.right_treelist)
 
         Config.save()
         try:
@@ -199,16 +199,17 @@ class SettingWindow(wx.Frame):
             wx.MessageDialog(None, u"热键绑定失败，请重试", u"Boss Key", wx.OK | wx.ICON_ERROR).ShowModal()
         
     def OnAddBinding(self,e):
-        left_checked = self.getSelectedItems(self.left_treelist)
+        left_checked = self.ItemsData(self.left_treelist, only_checked=True)
         self.InsertTreeList(left_checked, self.right_treelist, False)
         for item in left_checked:
-            self.left_treelist.DeleteItem(item)
+            self.RemoveItem(self.left_treelist, item)
+            
 
     def OnRemoveBinding(self,e):
-        right_checked = self.getSelectedItems(self.right_treelist)
+        right_checked = self.ItemsData(self.right_treelist, only_checked=True)
         self.InsertTreeList(right_checked, self.left_treelist, False)
         for item in right_checked:
-            self.right_treelist.DeleteItem(item)
+            self.RemoveItem(self.right_treelist, item)
 
     def OnReset(self,e):
         self.hide_show_hotkey_text.SetValue("Ctrl+Q")
@@ -251,7 +252,7 @@ class SettingWindow(wx.Frame):
     
     def RefreshLeftList(self,e=None):
         windows=tool.getAllWindows()
-        right=self.getAllItems(self.right_treelist)
+        right=self.ItemsData(self.right_treelist)
         list=[]
         for window in windows:
             flag=0
@@ -271,7 +272,11 @@ class SettingWindow(wx.Frame):
         for window in data:
             process = window['process']
             if process not in process_map:
-                process_map[process] = treelist.AppendItem(root, process)
+                exists_node=self.SearchProcessNode(treelist, process)
+                if exists_node is None:
+                    process_map[process] = treelist.AppendItem(root, process)
+                else:
+                    process_map[process] = exists_node
             item = treelist.AppendItem(process_map[process], window['title'])
             treelist.SetItemText(item, 1, str(window['hwnd']))
             treelist.SetItemText(item, 2, str(window['PID']))
@@ -280,31 +285,46 @@ class SettingWindow(wx.Frame):
         for process in process_map:
             treelist.Expand(process_map[process])
 
-    def getAllItems(self, treelist: dataview.TreeListCtrl):
-        items = []
-        item = treelist.GetFirstItem()
-        item_data = treelist.GetItemData(item)
-        if item_data is None or not item_data or not item.IsOk():
-            return items
-        else:
-            items.append(item_data)
-        while True:
-            item = treelist.GetNextItem(-1, item)
+    def SearchProcessNode(self, treelist: dataview.TreeListCtrl, process):
+        item = treelist.GetRootItem()
+        while item.IsOk():
+            item = treelist.GetNextItem(item)
             if not item.IsOk():
                 break
             data = treelist.GetItemData(item)
-            if data is not None and data:
-                items.append(data)
-        return items
+            if data is not None and data and data['process'] == process:
+                return treelist.GetItemParent(item)
+            
+    def RemoveItem(self, treelist: dataview.TreeListCtrl, data):
+        node=item = self.SearchProcessNode(treelist, data['process'])
+        if item is not None:
+            item = treelist.GetFirstChild(item)
+            while item.IsOk():
+                if treelist.GetItemData(item) == data:
+                    treelist.DeleteItem(item)
+                    break
+                item = treelist.GetNextSibling(item)
 
-    def getSelectedItems(self, treelist: dataview.TreeListCtrl):
-        items = []
-        root = treelist.GetRootItem()
-        for process_item in treelist.GetChildren(root):
-            for window_item in treelist.GetChildren(process_item):
-                if treelist.GetCheckedState(window_item):
-                    items.append(treelist.GetItemData(window_item))
-        return items
+            if not treelist.GetFirstChild(node).IsOk():
+                # 如果没有子节点了，删除父节点
+                treelist.DeleteItem(node)
+
+    def ItemsData(self, treelist: dataview.TreeListCtrl, only_checked=True, item_object=False):
+        res = []
+        item = treelist.GetRootItem()
+        while item.IsOk():
+            item = treelist.GetNextItem(item)
+            if not item.IsOk():
+                break
+            if only_checked and treelist.GetCheckedState(item) != wx.CHK_CHECKED:
+                continue
+            if item_object:
+                res.append(item)
+            else:
+                data = treelist.GetItemData(item)
+                if data is not None and data:
+                    res.append(data)
+        return res
 
     def recordHotkey(self, text_ctrl:wx.TextCtrl, btn:wx.Button):
         try:
