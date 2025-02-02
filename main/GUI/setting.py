@@ -187,10 +187,9 @@ class SettingWindow(wx.Frame):
         Config.hide_current = self.hide_current_checkbox.GetValue()
         Config.click_to_hide = self.click_to_hide_checkbox.GetValue()
         Config.hide_icon_after_hide = self.hide_icon_after_hide_checkbox.GetValue()
-        Config.HotkeyListener.ShowWindows()
+        Config.hide_binding = self.ItemsData(self.right_treelist, only_checked=False)
 
-        Config.hide_binding = self.ItemsData(self.right_treelist)
-
+        Config.HotkeyListener.ShowWindows(load=False)
         Config.save()
         try:
             Config.HotkeyListener.reBind()
@@ -252,7 +251,7 @@ class SettingWindow(wx.Frame):
     
     def RefreshLeftList(self,e=None):
         windows=tool.getAllWindows()
-        right=self.ItemsData(self.right_treelist)
+        right=self.ItemsData(self.right_treelist,only_checked=False)
         list=[]
         for window in windows:
             flag=0
@@ -309,7 +308,7 @@ class SettingWindow(wx.Frame):
                 # 如果没有子节点了，删除父节点
                 treelist.DeleteItem(node)
 
-    def ItemsData(self, treelist: dataview.TreeListCtrl, only_checked=True, item_object=False):
+    def ItemsData(self, treelist: dataview.TreeListCtrl, only_checked=False, item_object=False):
         res = []
         item = treelist.GetRootItem()
         while item.IsOk():
