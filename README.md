@@ -2,9 +2,15 @@
 
 ![](/src/static/bannar.jpg)
 
-老板来了？快用Boss-Key一键隐藏窗口！上班摸鱼必备神器。
+![Github Release Version](https://img.shields.io/github/v/release/IvanHanloth/Boss-Key)
+![Github Repo License](https://img.shields.io/github/license/IvanHanloth/Boss-Key)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/IvanHanloth/Boss-Key/tag-release.yml)
+![Supported Platform](https://img.shields.io/badge/Platform-Windows_10\+-cornflowerblue)
+![Python Version](https://img.shields.io/badge/Python-3.11.9-coral)
 
-支持多窗口隐藏、多进程隐藏、自定义热键、隐藏活动窗口、静音窗口、暂停视频播放等超多功能
+老板来了？快用Boss-Key老板键一键隐藏窗口！上班摸鱼必备神器。
+
+支持多窗口隐藏、多进程隐藏、自定义热键、隐藏活动窗口、静音窗口、暂停视频播放等超多功能，完全免费、开源，无强制弹窗等
 
 ## 应用截图
 ![](/src/static/screenshot-1.png)
@@ -16,7 +22,7 @@
 ![](/src/static/screenshot-4.png)
 
 ## 使用说明
-从v2.0.0版本开始，每个版本都会提供三种类型的程序，可以从[Realse页面](https://github.com/IvanHanloth/Boss-Key/releases)下载
+从v2.0.0版本开始，每个版本都会提供三种类型的程序，可以从[Release页面](https://github.com/IvanHanloth/Boss-Key/releases)下载
 - onefile - 单文件版，只有一个可执行程序，相对简洁、方便。由于每次启动都需要解压依赖，启动较慢、可能会被报毒
 - multifile - 多文件版，标准的程序版本，所有依赖文件被压缩到一个压缩包里，解压后可用
 - installer - 安装程序（推荐），完整封装的Boss-Key程序安装程序，提供一键安装、更新、卸载，可以更高效的管理Boss-Key程序
@@ -94,7 +100,7 @@
 ```
 Boss-Key
 ├── .github     Github配置文件、工作流文件
-│   ├── inno-script     Innot Setup配置文件夹
+│   ├── inno-script     InnoSetup配置文件夹
 │   └── workflows       Github Action工作流文件
 │       ├── build-test.yml      构建测试工作流
 │       ├── jekyll-gh-pages.yml     GithubPage构建工作流
