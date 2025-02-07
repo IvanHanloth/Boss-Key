@@ -1,12 +1,13 @@
 # nuitka-project: --onefile
-# nuitka-project: --windows-console-mode=disable
 # nuitka-project: --standalone
+# nuitka-project: --assume-yes-for-downloads
 # nuitka-project: --follow-import-to=core
-# nuitka-project: --windows-icon-from-ico=icon.ico
-# nuitka-project: --windows-product-name="Boss Key"
-# nuitka-project: --windows-file-description="Boss Key Application"
+# nuitka-project: --follow-import-to=GUI
 # nuitka-project: --copyright="Copyright (C) 2025 Ivan Hanloth All Rights Reserved. "
-# nuitka-project: --windows-company-name="Ivan Hanloth"
+# nuitka-project: --product-name="Boss Key"
+# nuitka-project: --file-description="Boss Key Application"
+# nuitka-project: --windows-icon-from-ico=icon.ico
+# nuitka-project: --windows-console-mode=disable
 
 from GUI import setting, taskbar
 from core import listener
@@ -16,9 +17,13 @@ import os
 import psutil
 import wx
 from core.config import Config
+import platform
 
-ctypes.windll.shcore.SetProcessDpiAwareness(2) # Win10 and Win8
-ctypes.windll.user32.SetProcessDPIAware() #Win7 and below
+if platform.system() == "Windows":
+    if platform.release() == "7":
+        ctypes.windll.user32.SetProcessDPIAware()
+    else:
+        ctypes.windll.shcore.SetProcessDpiAwareness(2)
 
 class APP(wx.App):
     def __init__(self):
