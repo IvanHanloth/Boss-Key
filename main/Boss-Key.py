@@ -82,15 +82,28 @@ if __name__ == '__main__':
     
     # 添加事件处理器清理函数
     def cleanup():
-        if Config.HotkeyListener:
-            Config.HotkeyListener.stop()
-        # 确保所有窗口在退出前销毁
-        if hasattr(Config, 'SettingWindow') and Config.SettingWindow:
-            if Config.SettingWindow.GetEventHandler() != Config.SettingWindow:
-                Config.SettingWindow.PopEventHandler(True)
-            Config.SettingWindow.Destroy()
-        if hasattr(Config, 'TaskBarIcon') and Config.TaskBarIcon:
-            Config.TaskBarIcon.Destroy()
+        try:
+            # 先停止热键监听
+            if hasattr(Config, 'HotkeyListener') and Config.HotkeyListener:
+                Config.HotkeyListener.stop()
+            
+            # 确保所有窗口在退出前安全销毁
+            if wx.GetApp() and wx.GetApp().IsMainLoopRunning():
+                # 先隐藏所有窗口，避免销毁过程中的可视化问题
+                if hasattr(Config, 'SettingWindow') and Config.SettingWindow:
+                    if Config.SettingWindow.IsShown():
+                        Config.SettingWindow.Hide()
+                
+                # 然后按正确顺序销毁
+                if hasattr(Config, 'TaskBarIcon') and Config.TaskBarIcon:
+                    Config.TaskBarIcon.Destroy()
+                    Config.TaskBarIcon = None
+                    
+                if hasattr(Config, 'SettingWindow') and Config.SettingWindow:
+                    Config.SettingWindow.Destroy()
+                    Config.SettingWindow = None
+        except Exception as e:
+            print(f"退出清理时出错: {str(e)}")
     
     # 注册清理函数
     import atexit

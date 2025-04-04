@@ -284,16 +284,50 @@ class SettingWindow(wx.Frame):
         treelist = e.GetEventObject()
         item = e.GetItem()
         is_checked = treelist.GetCheckedState(item)
-        treelist.CheckItemRecursively(item, is_checked)
-        # 检查父级是否需要修改状态
+        
+        # 递归设置子节点状态
+        self.CheckItemRecursively(treelist, item, is_checked)
+        
+        # 更新父节点状态
+        self.UpdateParentCheckState(treelist, item)
+    
+    def CheckItemRecursively(self, treelist, item, check_state):
+        """递归设置项目及其子项的选中状态"""
+        treelist.CheckItem(item, check_state)
+        
+        # 处理所有子节点
+        child = treelist.GetFirstChild(item)
+        while child.IsOk():
+            self.CheckItemRecursively(treelist, child, check_state)
+            child = treelist.GetNextSibling(child)
+    
+    def UpdateParentCheckState(self, treelist, item):
+        """更新父节点的选中状态"""
         parent = treelist.GetItemParent(item)
-        if parent == treelist.GetRootItem():
-            return
-        else:
-            if treelist.AreAllChildrenInState(parent, wx.CHK_CHECKED):
+        if parent != treelist.GetRootItem():
+            # 检查所有兄弟节点状态
+            all_checked = True
+            all_unchecked = True
+            
+            child = treelist.GetFirstChild(parent)
+            while child.IsOk():
+                state = treelist.GetCheckedState(child)
+                if state != wx.CHK_CHECKED:
+                    all_checked = False
+                if state != wx.CHK_UNCHECKED:
+                    all_unchecked = False
+                child = treelist.GetNextSibling(child)
+            
+            # 根据子节点状态设置父节点状态
+            if all_checked:
                 treelist.CheckItem(parent, wx.CHK_CHECKED)
-            elif treelist.AreAllChildrenInState(parent, wx.CHK_UNCHECKED):
+            elif all_unchecked:
                 treelist.CheckItem(parent, wx.CHK_UNCHECKED)
+            else:
+                treelist.CheckItem(parent, wx.CHK_UNDETERMINED)
+            
+            # 递归更新上层父节点
+            self.UpdateParentCheckState(treelist, parent)
 
     def OnSendBeforeHide(self, e):
         send_before_hide_checkbox = self.FindWindowById(self.ID_SEND_BEFORE_HIDE_CHECKBOX)
@@ -368,6 +402,10 @@ class SettingWindow(wx.Frame):
         treelist.Expand(root)
         for process in process_map:
             treelist.Expand(process_map[process])
+        
+        # 初始化所有父节点的选中状态
+        for process in process_map:
+            self.UpdateParentCheckState(treelist, treelist.GetFirstChild(process_map[process]))
 
     def SearchProcessNode(self, treelist: dataview.TreeListCtrl, process):
         item = treelist.GetRootItem()

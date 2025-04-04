@@ -27,9 +27,11 @@ class HotkeyListener():
             try:
                 msg = self.Queue.get()
                 if msg == "showTaskBarIcon":
-                    Config.TaskBarIcon.ShowIcon()
+                    if hasattr(Config, 'TaskBarIcon') and Config.TaskBarIcon and wx.GetApp():
+                        wx.CallAfter(Config.TaskBarIcon.ShowIcon)
                 elif msg == "hideTaskBarIcon":
-                    Config.TaskBarIcon.HideIcon()
+                    if hasattr(Config, 'TaskBarIcon') and Config.TaskBarIcon and wx.GetApp():
+                        wx.CallAfter(Config.TaskBarIcon.HideIcon)
                 elif msg == "closeApp":
                     print("收到关闭消息")
                     tool.sendNotify("Boss Key已停止服务", "Boss Key已成功退出")
@@ -37,15 +39,8 @@ class HotkeyListener():
                     self.stop()
                     # 先解除所有窗口的事件处理器绑定
                     try:
-                        if Config.SettingWindow:
-                            for child in Config.SettingWindow.GetChildren():
-                                if hasattr(child, 'Destroy'):
-                                    child.Destroy()
-                            Config.SettingWindow.Destroy()
-                        if Config.TaskBarIcon:
-                            Config.TaskBarIcon.Destroy()
-                        if Config.UpdateWindow:
-                            Config.UpdateWindow.Destroy()
+                        if wx.GetApp():  # 确保应用程序仍在运行
+                            wx.CallAfter(self.cleanup_windows)
                     except Exception as e:
                         print(f"清理窗口时出错: {e}")
                     exit_flag = True
@@ -55,9 +50,31 @@ class HotkeyListener():
                 pass
 
         if exit_flag:
-            wx.CallAfter(wx.GetApp().ExitMainLoop)
+            if wx.GetApp():
+                wx.CallAfter(wx.GetApp().ExitMainLoop)
             sys.exit(0)
 
+    def cleanup_windows(self):
+        """安全清理窗口资源"""
+        try:
+            if hasattr(Config, 'SettingWindow') and Config.SettingWindow:
+                if Config.SettingWindow.IsShown():
+                    Config.SettingWindow.Hide()
+                Config.SettingWindow.Destroy()
+                Config.SettingWindow = None
+                
+            if hasattr(Config, 'UpdateWindow') and Config.UpdateWindow:
+                if Config.UpdateWindow.IsShown():
+                    Config.UpdateWindow.Hide()
+                Config.UpdateWindow.Destroy()
+                Config.UpdateWindow = None
+                
+            if hasattr(Config, 'TaskBarIcon') and Config.TaskBarIcon:
+                Config.TaskBarIcon.Destroy()
+                Config.TaskBarIcon = None
+        except Exception as e:
+            print(f"清理窗口资源时出错: {str(e)}")
+            
     def reBind(self):
         self.stop()
         self.BindHotKey()
