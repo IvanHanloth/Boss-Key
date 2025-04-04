@@ -7,6 +7,7 @@ from pynput import keyboard
 import multiprocessing
 import threading
 import time
+import wx
 
 class HotkeyListener():
     def __init__(self):
@@ -18,6 +19,7 @@ class HotkeyListener():
         self.Queue = multiprocessing.Queue()
         self.listener = None
         self.reBind()
+        self.end_flag=False
         threading.Thread(target=self.listenToQueue,daemon=True).start()
 
     def listenToQueue(self):
@@ -26,37 +28,48 @@ class HotkeyListener():
             try:
                 msg = self.Queue.get()
                 if msg == "showTaskBarIcon":
-                    Config.TaskBarIcon.ShowIcon()
+                    wx.CallAfter(Config.TaskBarIcon.ShowIcon())
                 elif msg == "hideTaskBarIcon":
-                    Config.TaskBarIcon.HideIcon()
+                    wx.CallAfter(Config.TaskBarIcon.HideIcon())
                 elif msg == "closeApp":
                     print("收到关闭消息")
-                    tool.sendNotify("Boss Key已停止服务", "Boss Key已成功退出")
                     self.ShowWindows()
-                    self.stop()
+                    tool.sendNotify("Boss Key已停止服务", "Boss Key已成功退出")
+                    self._stop()
                     try:
-                        Config.SettingWindow.Destroy()
+                        wx.FindWindowById(Config.SettingWindowId).Destroy()
                         Config.TaskBarIcon.Destroy()
-                        Config.UpdateWindow.Destroy()
-                    except:
+                        wx.FindWindowById(Config.UpdateWindowId).Destroy()
+                    except Exception as e:
+                        print(e)
                         pass
                     exit_flag = True
                     break
             except:
                 pass
-
-        if exit_flag:
-            sys.exit(0)
+            finally:
+                if exit_flag:
+                    sys.exit(0)
 
     def reBind(self):
-        self.stop()
+        self._stop()
         self.BindHotKey()
     
     def ListenerProcess(self,hotkey):
-        with keyboard.GlobalHotKeys(hotkey) as listener:
-            while True: #避免意外退出
-                listener.join()
-                print("线程意外退出")
+        try:
+            with keyboard.GlobalHotKeys(hotkey) as listener:
+                self.end_flag = False
+                while listener.running and not self.end_flag:
+                    time.sleep(0.1)  # 减少CPU使用率
+                
+                # 如果是因为 end_flag 退出但监听器仍在运行
+                if listener.running and self.end_flag:
+                    listener.stop()
+                    
+                print("热键监听已停止")
+        except Exception as e:
+            self.ShowWindows(False)
+            print(f"热键监听出错: {e}")
 
     def BindHotKey(self):
         hotkeys = {
@@ -136,8 +149,12 @@ class HotkeyListener():
     def Close(self,e=""):
         self.Queue.put("closeApp")
     
-    def stop(self):
+    def _stop(self):
+        """
+        直接关闭listener，应该使用Close
+        """
         if self.listener is not None:
+            self.end_flag=True 
             try:
                 self.listener.terminate()
                 self.listener.join()

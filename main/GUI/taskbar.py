@@ -55,22 +55,21 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
                 tool.sendNotify(title="开机自启状态变化", message="Boss Key开机自启开启失败")
 
     def onSetting(self, e):
-        Config.SettingWindow.RefreshLeftList()
-        Config.SettingWindow.Show()
+        window=wx.FindWindowById(Config.SettingWindowId)
+        window.RefreshLeftList()
+        window.Show()
 
     def onAbout(self, e):
         about.AboutWindow().Show()
 
     def onExit(self, e):
         Config.HotkeyListener.Close()
-        sys.exit(0)
 
     def onUpdate(self, e):
-        if Config.UpdateWindow != "":
-            Config.UpdateWindow.Show()
+        if Config.UpdateWindowId != -1:
+            wx.FindWindowById(Config.UpdateWindowId).Show()
         else:
-            Config.UpdateWindow = about.UpdateWindow()
-            Config.UpdateWindow.Show()
+            about.UpdateWindow(Config.UpdateWindowId).Show()
 
     def HideIcon(self):
         wx.CallAfter(self.RemoveIcon)

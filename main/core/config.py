@@ -59,11 +59,10 @@ SOFTWARE.
     # 判断是否为首次启动
     first_start = not os.path.exists(config_path)
 
-    SettingWindow=""
     TaskBarIcon=""
-    UpdateWindow=""
-
     HotkeyListener= ""
+    SettingWindowId = -1
+    UpdateWindowId = -1
     
     recording_hotkey = False
     recorded_hotkey = None

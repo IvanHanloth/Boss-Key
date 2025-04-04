@@ -13,9 +13,9 @@ class RecordedHotkey:
 
 class RecordWindow(wx.Dialog):
     # 定义组件ID常量
-    ID_CONFIRM_BTN = wx.NewId()
-    ID_STATUS_TEXT = wx.NewId()
-    ID_KEY_TEXT = wx.NewId()
+    ID_CONFIRM_BTN = wx.NewIdRef()
+    ID_STATUS_TEXT = wx.NewIdRef()
+    ID_KEY_TEXT = wx.NewIdRef()
     
     def __init__(self):
         wx.Dialog.__init__(self, None, title="录制热键 - Boss Key", style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
