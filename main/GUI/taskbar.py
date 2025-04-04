@@ -6,7 +6,7 @@ import sys
 
 class TaskBarIcon(wx.adv.TaskBarIcon):
 
-    MENU_SETTING,MENU_EXIT,MENU_STARTUP,MENU_UPDATE = wx.NewIdRef(count=4)
+    MENU_SETTING, MENU_EXIT, MENU_STARTUP, MENU_UPDATE = wx.NewIdRef(count=4)
 
     def __init__(self):
         super().__init__()
@@ -26,55 +26,50 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
         self.Bind(wx.adv.EVT_TASKBAR_LEFT_DOWN, self.onLeftClick)
 
     def CreatePopupMenu(self):
-        self.menu = wx.Menu()
-        self.menu.Append(self.MENU_SETTING, '设置')
-        self.menu.Append(self.MENU_STARTUP, '开机自启', kind=wx.ITEM_CHECK)
-        self.menu.Check(self.MENU_STARTUP, tool.checkStartup("Boss Key Application",Config.file_path))
-        self.menu.AppendSeparator()
-        self.menu.Append(self.MENU_UPDATE, '检查更新')
-        self.menu.Append(wx.ID_ABOUT, '关于')
-        self.menu.AppendSeparator()
-        self.menu.Append(self.MENU_EXIT, '退出')
-        return self.menu
+        menu = wx.Menu()
+        menu.Append(self.MENU_SETTING, '设置')
+        menu.Append(self.MENU_STARTUP, '开机自启', kind=wx.ITEM_CHECK)
+        menu.Check(self.MENU_STARTUP, tool.checkStartup("Boss Key Application", Config.file_path))
+        menu.AppendSeparator()
+        menu.Append(self.MENU_UPDATE, '检查更新')
+        menu.Append(wx.ID_ABOUT, '关于')
+        menu.AppendSeparator()
+        menu.Append(self.MENU_EXIT, '退出')
+        return menu
     
-    def onLeftClick(self,e=''):
+    def onLeftClick(self, e=''):
         if Config.click_to_hide:
-            if Config.HotkeyListener!="":
+            if Config.HotkeyListener != "":
                 Config.HotkeyListener.onHide()
 
-    def onStartup(self,e):
-        if tool.checkStartup("Boss Key Application",Config.file_path):
+    def onStartup(self, e):
+        if tool.checkStartup("Boss Key Application", Config.file_path):
             if tool.removeStartup("Boss Key Application"):
-                tool.sendNotify(title="开机自启状态变化",message="Boss Key开机自启已关闭")
-                self.menu.Check(self.MENU_STARTUP,False)
+                tool.sendNotify(title="开机自启状态变化", message="Boss Key开机自启已关闭")
             else:
-                tool.sendNotify(title="开机自启状态变化",message="Boss Key开机自启关闭失败")
-                self.menu.Check(self.MENU_STARTUP,True)
+                tool.sendNotify(title="开机自启状态变化", message="Boss Key开机自启关闭失败")
         else:
-            if tool.addStartup("Boss Key Application",Config.file_path):
-                tool.sendNotify(title="开机自启状态变化",message="Boss Key开机自启已开启")
-                self.menu.Check(self.MENU_STARTUP,True)
+            if tool.addStartup("Boss Key Application", Config.file_path):
+                tool.sendNotify(title="开机自启状态变化", message="Boss Key开机自启已开启")
             else:
-                tool.sendNotify(title="开机自启状态变化",message="Boss Key开机自启开启失败")
-                self.menu.Check(self.MENU_STARTUP,False)
+                tool.sendNotify(title="开机自启状态变化", message="Boss Key开机自启开启失败")
 
-    def onSetting(self,e):
-        Config.SettingWindow.RefreshLeftList()
-        Config.SettingWindow.Show()
+    def onSetting(self, e):
+        window=wx.FindWindowById(Config.SettingWindowId)
+        window.RefreshLeftList()
+        window.Show()
 
-    def onAbout(self,e):
+    def onAbout(self, e):
         about.AboutWindow().Show()
 
-    def onExit(self,e):
+    def onExit(self, e):
         Config.HotkeyListener.Close()
-        sys.exit(0)
 
-    def onUpdate(self,e):
-        if Config.UpdateWindow!="":
-            Config.UpdateWindow.Show()
+    def onUpdate(self, e):
+        if Config.UpdateWindowId != -1:
+            wx.FindWindowById(Config.UpdateWindowId).Show()
         else:
-            Config.UpdateWindow=about.UpdateWindow()
-            Config.UpdateWindow.Show()
+            about.UpdateWindow(Config.UpdateWindowId).Show()
 
     def HideIcon(self):
         wx.CallAfter(self.RemoveIcon)

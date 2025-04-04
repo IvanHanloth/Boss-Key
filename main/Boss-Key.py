@@ -18,6 +18,7 @@ import psutil
 import wx
 from core.config import Config
 import platform
+import atexit
 
 if platform.system() == "Windows":
     if platform.release() == "7":
@@ -28,12 +29,20 @@ if platform.system() == "Windows":
 class APP(wx.App):
     def __init__(self):
         wx.App.__init__(self)
-        
+        def clean():
+            try:
+                Config.HotkeyListener.Close()
+            except:
+                pass
+        atexit.register(clean)
+
         # 设置语言环境为中文
         self.locale = wx.Locale(wx.LANGUAGE_CHINESE_SIMPLIFIED)
+
         self.SetAppName(Config.AppName)
         self.SetAppDisplayName(Config.AppName)
         self.SetVendorName(Config.AppAuthor)
+
         lock=os.path.join(os.path.dirname(sys.argv[0]),"Boss-Key.lock")
         if self.is_already_running(lock):
             ask=wx.MessageBox("Boss Key 可能已在运行\n点击“确定”继续运行新的Boss-Key程序\n点击“取消”直接关闭此窗口","Boss Key", wx.OK | wx.ICON_INFORMATION | wx.CANCEL | wx.CANCEL_DEFAULT)
@@ -47,37 +56,41 @@ class APP(wx.App):
         with open(name, "w") as f:
             f.write(str(psutil.Process().pid))
 
-    def is_already_running(self,name):
-        if os.path.exists(name):
-            with open(name, "r") as f:
-                pid=f.read()
-            if pid == "":
-                self.write_pid(name)
-            else:
-                try:
-                    process=psutil.Process(int(pid))
-                    if process.is_running():
-                        this_name=psutil.Process(psutil.Process().pid).name() #获取当前进程名
-                        if this_name==process.name():
-                            return True
-                        else:
-                            self.write_pid(name)
-                            return False
-                    else:
-                        self.write_pid(name)
-                        return False
-                except:
-                    self.write_pid(name)
-                    return False
-        else:
+    def is_already_running(self, name):
+        if not os.path.exists(name):
             self.write_pid(name)
+            return False
+
+        with open(name, "r") as f:
+            pid = f.read()
+
+        if pid == "":
+            self.write_pid(name)
+            return False
+
+        try:
+            process = psutil.Process(int(pid))
+            if not process.is_running():
+                self.write_pid(name)
+                return False
+
+            this_name = psutil.Process(psutil.Process().pid).name()  # 获取当前进程名
+            if this_name == process.name():
+                return True
+
+            self.write_pid(name)
+            return False
+        except:
+            self.write_pid(name)
+            return False
+
 
 if __name__ == '__main__':
     app = APP()
+    Config.SettingWindowId = wx.NewIdRef()
     Config.TaskBarIcon=taskbar.TaskBarIcon()
     Config.HotkeyListener=listener.HotkeyListener()
-    Config.SettingWindow=setting.SettingWindow()
+    setting.SettingWindow(Config.SettingWindowId)
     if Config.first_start:
-        Config.SettingWindow.Show()
+        wx.FindWindowById(Config.SettingWindowId).Show()
     app.MainLoop()
-    

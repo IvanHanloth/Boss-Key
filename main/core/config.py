@@ -49,6 +49,7 @@ SOFTWARE.
 
     click_to_hide = True
     hide_icon_after_hide = False
+    path_match = False
 
     hide_binding = []
     
@@ -58,11 +59,10 @@ SOFTWARE.
     # 判断是否为首次启动
     first_start = not os.path.exists(config_path)
 
-    SettingWindow=""
     TaskBarIcon=""
-    UpdateWindow=""
-
     HotkeyListener= ""
+    SettingWindowId = -1
+    UpdateWindowId = -1
     
     recording_hotkey = False
     recorded_hotkey = None
@@ -88,6 +88,7 @@ SOFTWARE.
         Config.send_before_hide = config.get("setting", {}).get("send_before_hide", False)
         Config.hide_current = config.get("setting", {}).get("hide_current", True)
         Config.hide_icon_after_hide = config.get("setting", {}).get("hide_icon_after_hide", False)
+        Config.path_match = config.get("setting", {}).get("path_match", False)
         
         Config.click_to_hide= config.get("setting", {}).get("click_to_hide", True)
 
@@ -115,7 +116,8 @@ SOFTWARE.
                 'send_before_hide': Config.send_before_hide,
                 'hide_current': Config.hide_current,
                 'click_to_hide': Config.click_to_hide,
-                'hide_icon_after_hide': Config.hide_icon_after_hide
+                'hide_icon_after_hide': Config.hide_icon_after_hide,
+                'path_match': Config.path_match
             },
             # 将WindowInfo对象列表转换为字典列表用于JSON序列化
             "hide_binding": [item.to_dict() if isinstance(item, WindowInfo) else item for item in Config.hide_binding]
