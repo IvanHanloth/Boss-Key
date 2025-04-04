@@ -32,7 +32,7 @@ jobs:
       # 进行编译（添加Windows 7兼容性选项）
       - name: Run Compile
         run: |
-            python -m nuitka --windows-file-version=0.0.0.0 --windows-disable-console --windows-company-name="IvanHanloth" --windows-compatibility-vista --show-progress --mingw64 --assume-yes-for-downloads --output-dir=out main/Boss-Key.py
+            python -m nuitka --windows-file-version=0.0.0.0 --windows-disable-console --windows-company-name="IvanHanloth" --show-progress --mingw64 --assume-yes-for-downloads --output-dir=out main/Boss-Key.py
 
       # 添加版本信息到可执行文件并重命名
       - name: Add version information and rename executable
@@ -79,6 +79,7 @@ jobs:
   compile-to-installer:
     runs-on: windows-2019
     # needs: deploy-test
+    needs: build-main-files
     steps:
     - name: Checkout code 
       uses: actions/checkout@v2
