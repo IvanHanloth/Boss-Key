@@ -8,8 +8,8 @@ from .model import WindowInfo
  
 class Config:
     AppName = "Boss Key"
-    AppVersion = "v2.0.2.0"
-    AppReleaseDate = "2025-02-02"
+    AppVersion = "v2.0.3.0"
+    AppReleaseDate = "2025-04-04"
     AppAuthor = "IvanHanloth"
     AppDescription = "老板来了？快用Boss-Key老板键一键隐藏静音当前窗口！上班摸鱼必备神器"
     AppCopyRight = "Copyright © 2022-2025 Ivan Hanloth All Rights Reserved."
