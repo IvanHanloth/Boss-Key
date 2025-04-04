@@ -2,11 +2,13 @@ import wx, wx.adv
 from core.config import Config
 import core.tools as tool
 from GUI import about
+from GUI.window_restore import WindowRestoreDialog
 import sys
 
 class TaskBarIcon(wx.adv.TaskBarIcon):
 
-    MENU_SETTING, MENU_EXIT, MENU_STARTUP, MENU_UPDATE = wx.NewIdRef(count=4)
+    MENU_SETTING, MENU_EXIT, MENU_STARTUP, MENU_UPDATE, MENU_RESTORE = wx.NewIdRef(count=5)
+    ID_RESTORE = wx.NewIdRef(count=1)
 
     def __init__(self):
         super().__init__()
@@ -22,6 +24,7 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
         self.Bind(wx.EVT_MENU, self.onExit, id=self.MENU_EXIT)
         self.Bind(wx.EVT_MENU, self.onAbout, id=wx.ID_ABOUT)
         self.Bind(wx.EVT_MENU, self.onUpdate, id=self.MENU_UPDATE)
+        self.Bind(wx.EVT_MENU, self.onRestore, id=self.MENU_RESTORE)
         # 绑定任务栏图标单击事件
         self.Bind(wx.adv.EVT_TASKBAR_LEFT_DOWN, self.onLeftClick)
 
@@ -31,6 +34,7 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
         menu.Append(self.MENU_STARTUP, '开机自启', kind=wx.ITEM_CHECK)
         menu.Check(self.MENU_STARTUP, tool.checkStartup("Boss Key Application", Config.file_path))
         menu.AppendSeparator()
+        menu.Append(self.MENU_RESTORE, '窗口恢复工具')
         menu.Append(self.MENU_UPDATE, '检查更新')
         menu.Append(wx.ID_ABOUT, '关于')
         menu.AppendSeparator()
@@ -70,6 +74,16 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
             wx.FindWindowById(Config.UpdateWindowId).Show()
         else:
             about.UpdateWindow(Config.UpdateWindowId).Show()
+
+    def onRestore(self, e):
+        """显示窗口恢复对话框"""
+        dialog = wx.FindWindowById(self.ID_RESTORE)
+        if dialog is None:
+            WindowRestoreDialog(self.ID_RESTORE).Show()
+        else:
+            dialog.Restore()
+            dialog.Raise()
+            dialog.RefreshLeftList()
 
     def HideIcon(self):
         wx.CallAfter(self.RemoveIcon)

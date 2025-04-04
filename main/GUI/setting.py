@@ -1,10 +1,8 @@
 import wx
 import wx.dataview as dataview
-import wx.dataview
 from core.config import Config
 import GUI.record as record
 import core.tools as tool
-import json
 import wx.lib.buttons as buttons
 from core.model import WindowInfo
 
@@ -52,7 +50,7 @@ class SettingWindow(wx.Frame):
         # 左边列表
         left_staticbox = wx.StaticBox(panel, label="现有窗口进程")
         left_sizer = wx.StaticBoxSizer(left_staticbox, wx.VERTICAL)
-        self.left_treelist = dataview.TreeListCtrl(panel, self.ID_LEFT_TREELIST, style=wx.dataview.TL_CHECKBOX)
+        self.left_treelist = dataview.TreeListCtrl(panel, self.ID_LEFT_TREELIST, style=dataview.TL_CHECKBOX)
         self.left_treelist.AppendColumn('窗口标题', width=300)
         self.left_treelist.AppendColumn('窗口句柄', width=100)
         self.left_treelist.AppendColumn('进程PID', width=150)
@@ -71,7 +69,7 @@ class SettingWindow(wx.Frame):
         # 右边列表
         right_staticbox = wx.StaticBox(panel, label="已绑定进程")
         right_sizer = wx.StaticBoxSizer(right_staticbox, wx.VERTICAL)
-        self.right_treelist = dataview.TreeListCtrl(panel, self.ID_RIGHT_TREELIST, style=wx.dataview.TL_CHECKBOX)
+        self.right_treelist = dataview.TreeListCtrl(panel, self.ID_RIGHT_TREELIST, style=dataview.TL_CHECKBOX)
         self.right_treelist.AppendColumn('窗口标题', width=300)
         self.right_treelist.AppendColumn('窗口句柄', width=100)
         self.right_treelist.AppendColumn('进程PID', width=150)
@@ -419,7 +417,7 @@ class SettingWindow(wx.Frame):
                 # 如果没有子节点了，删除父节点
                 treelist.DeleteItem(node)
 
-    def ItemsData(self, treelist: dataview.TreeListCtrl, only_checked=False, item_object=False):
+    def ItemsData(self, treelist: dataview.TreeListCtrl, only_checked=False, item_object=False)->list[WindowInfo]:
         res = []
         item = treelist.GetRootItem()
         while item.IsOk():
