@@ -339,24 +339,7 @@ class SettingWindow(wx.Frame):
         hide_show_hotkey_btn = self.FindWindowById(self.ID_HIDE_SHOW_HOTKEY_BTN)
         self.recordHotkey(hide_show_hotkey_text, hide_show_hotkey_btn)
 
-    def OnClose(self, e):
-        # 确保清除所有的事件处理器
-        try:
-            for child in self.GetChildren():
-                # 确保每个子组件的事件处理器被清理
-                if hasattr(child, 'PopEventHandler'):
-                    while child.GetEventHandler() != child:
-                        child.PopEventHandler(True)
-            
-            # 断开树列表的事件绑定
-            if hasattr(self, 'left_treelist') and self.left_treelist:
-                self.left_treelist.Unbind(dataview.EVT_TREELIST_ITEM_CHECKED)
-            
-            if hasattr(self, 'right_treelist') and self.right_treelist:
-                self.right_treelist.Unbind(dataview.EVT_TREELIST_ITEM_CHECKED)
-        except Exception as e:
-            print(f"清理事件处理器时出错: {str(e)}")
-        
+    def OnClose(self, e):        
         self.Hide()
 
     def OnRecordCL(self, e):
