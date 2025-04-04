@@ -4,6 +4,7 @@ import json
 from .icon import get_icon
 from configparser import ConfigParser
 from io import BytesIO
+from .model import WindowInfo
  
 class Config:
     AppName = "Boss Key"
@@ -93,7 +94,8 @@ SOFTWARE.
         Config.hide_hotkey = config.get("hotkey", {}).get("hide_hotkey", "Ctrl+Q")
         Config.close_hotkey = config.get("hotkey", {}).get("close_hotkey", "Win+Esc")
 
-        Config.hide_binding = config.get("hide_binding", [])
+        # 将hide_binding从字典列表转换为WindowInfo对象列表
+        Config.hide_binding = [WindowInfo.from_dict(item) for item in config.get("hide_binding", [])]
 
         if config.get('version', '') != Config.AppVersion:
             Config.save()
@@ -115,7 +117,8 @@ SOFTWARE.
                 'click_to_hide': Config.click_to_hide,
                 'hide_icon_after_hide': Config.hide_icon_after_hide
             },
-            "hide_binding" : Config.hide_binding
+            # 将WindowInfo对象列表转换为字典列表用于JSON序列化
+            "hide_binding": [item.to_dict() if isinstance(item, WindowInfo) else item for item in Config.hide_binding]
         }
 
         with open(Config.config_path, 'w', encoding='utf-8') as f:

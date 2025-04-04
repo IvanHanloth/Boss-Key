@@ -54,7 +54,7 @@ class UpdateWindow(wx.Dialog):
     def onCheckUpdate(self):
         def checkUpdate():
             try:
-                info = check_update()
+                info = checkUpdate()
             except:
                 wx.CallAfter(self.init_error_UI)
                 return

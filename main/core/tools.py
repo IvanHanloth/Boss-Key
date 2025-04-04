@@ -9,7 +9,9 @@ import datetime
 import requests
 import json
 
-def check_update():
+from core.model import WindowInfo
+
+def checkUpdate():
     requests.packages.urllib3.disable_warnings()
     # 获取最新版本信息
     try:
@@ -146,44 +148,66 @@ def hwnd2windowName(hwnd):
         title=None
     return title
 
-def getAllWindows():
+def getAllWindows()-> list[WindowInfo]:
     # 获取所有窗口信息
-    def enumHandler(hwnd, windows:list):
+    def enumHandler(hwnd, windows:list[WindowInfo]):
         if win32gui.IsWindowVisible(hwnd):
             title = hwnd2windowName(hwnd)
             
             pid = win32process.GetWindowThreadProcessId(hwnd)[1]
             process_name = psutil.Process(pid).name()
-            windows.append({'title': title, 'hwnd': int(hwnd), 'process': process_name, 'PID':int(pid)})
+            process_path = psutil.Process(pid).exe()
+            
+            windows.append(WindowInfo(
+                title=title, 
+                hwnd=int(hwnd), 
+                process=process_name, 
+                PID=int(pid), 
+                path=process_path
+            ))
         return True
 
     windows = []
     win32gui.EnumWindows(enumHandler, windows)
-    windows.sort(key=lambda x: x['title'])
+    windows.sort(key=lambda x: x.title)
 
     return windows
 
-def isSameWindow(w1:dict,w2:dict,strict=False):
+def isSameWindow(w1:WindowInfo, w2:WindowInfo, auto=False, strict=True):
     """
     判断两个窗口的信息是否指向同一个窗口
-    w1、w2: dict, 包含hwnd、title、process、PID
-    strict: 启用严格模式
+    w1、w2: WindowInfo对象或字典
+    auto: 智能匹配模式，默认False
+    strict: 严格模式，默认True，非严格模式下只判断进程名称是否相同
     """
+    # 转换可能的字典为WindowInfo对象
+    if isinstance(w1, dict):
+        w1 = WindowInfo.from_dict(w1)
+    if isinstance(w2, dict):
+        w2 = WindowInfo.from_dict(w2)
     
     ## 一模一样的两个，肯定是同一个
-    if w1==w2:
+    if w1 == w2:
         return True
     
     process_except=["explorer.exe"]
 
-    hwnd_same=w1['hwnd']==w2['hwnd']
-    title_same=w1['title']==w2['title'] and w1['title']!="无标题窗口"
-    process_name_same=w1['process']==w2['process'] and w1 not in process_except
-    PID_same=w1['PID']==w2['PID']
-    process_same=process_name_same or PID_same
+    hwnd_same = w1.hwnd == w2.hwnd
+    title_same = w1.title == w2.title and w1.title != "无标题窗口"
+    process_name_same = w1.process == w2.process and w1.process not in process_except
+    process_path_same = w1.path == w2.path
+    PID_same = w1.PID == w2.PID
+    process_same = process_name_same or PID_same
 
+    print(w1.process)
     ## 非严格模式下
     if not strict:
+        ## 进程名称、路径相同则同一个
+        if process_name_same and process_path_same:
+            return True
+
+    ## 非智能模式下
+    if not auto:
         ## 进程名称相同且标题名称相同则同一个
         if process_name_same and title_same:
             return True

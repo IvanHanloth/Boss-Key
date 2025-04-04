@@ -6,6 +6,7 @@ import GUI.record as record
 import core.tools as tool
 import json
 import wx.lib.buttons as buttons
+from core.model import WindowInfo
 
 class SettingWindow(wx.Frame):
     def __init__(self):
@@ -187,6 +188,8 @@ class SettingWindow(wx.Frame):
         Config.hide_current = self.hide_current_checkbox.GetValue()
         Config.click_to_hide = self.click_to_hide_checkbox.GetValue()
         Config.hide_icon_after_hide = self.hide_icon_after_hide_checkbox.GetValue()
+        
+        # 获取Windows对象列表
         Config.hide_binding = self.ItemsData(self.right_treelist, only_checked=False)
 
         Config.HotkeyListener.ShowWindows(load=False)
@@ -269,17 +272,21 @@ class SettingWindow(wx.Frame):
         root = treelist.GetRootItem()
         process_map = {}
         for window in data:
-            process = window['process']
+            # 确保window是WindowInfo对象
+            if isinstance(window, dict):
+                window = WindowInfo.from_dict(window)
+                
+            process = window.process
             if process not in process_map:
                 exists_node=self.SearchProcessNode(treelist, process)
                 if exists_node is None:
                     process_map[process] = treelist.AppendItem(root, process)
                 else:
                     process_map[process] = exists_node
-            item = treelist.AppendItem(process_map[process], window['title'])
-            treelist.SetItemText(item, 1, str(window['hwnd']))
-            treelist.SetItemText(item, 2, str(window['PID']))
-            treelist.SetItemData(item, {"title":window['title'],"hwnd": window['hwnd'], "process": window['process'], "PID": window['PID']})
+            item = treelist.AppendItem(process_map[process], window.title)
+            treelist.SetItemText(item, 1, str(window.hwnd))
+            treelist.SetItemText(item, 2, str(window.PID))
+            treelist.SetItemData(item, window)
         treelist.Expand(root)
         for process in process_map:
             treelist.Expand(process_map[process])
@@ -291,15 +298,20 @@ class SettingWindow(wx.Frame):
             if not item.IsOk():
                 break
             data = treelist.GetItemData(item)
-            if data is not None and data and data['process'] == process:
+            if data is not None and hasattr(data, 'process') and data.process == process:
                 return treelist.GetItemParent(item)
             
     def RemoveItem(self, treelist: dataview.TreeListCtrl, data):
-        node=item = self.SearchProcessNode(treelist, data['process'])
+        # 确保data是WindowInfo对象
+        if isinstance(data, dict):
+            data = WindowInfo.from_dict(data)
+            
+        node=item = self.SearchProcessNode(treelist, data.process)
         if item is not None:
             item = treelist.GetFirstChild(item)
             while item.IsOk():
-                if treelist.GetItemData(item) == data:
+                item_data = treelist.GetItemData(item)
+                if item_data and item_data == data:
                     treelist.DeleteItem(item)
                     break
                 item = treelist.GetNextSibling(item)
