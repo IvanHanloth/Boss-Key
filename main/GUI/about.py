@@ -22,8 +22,8 @@ class AboutWindow():
         wx.adv.AboutBox(self.info)
 
 class UpdateWindow(wx.Dialog):
-    def __init__(self):
-        super().__init__(None, title="检查更新 - Boss Key", style=wx.DEFAULT_DIALOG_STYLE | wx.STAY_ON_TOP | wx.RESIZE_BORDER)
+    def __init__(self,id=None):
+        super().__init__(None,id=id, title="检查更新 - Boss Key", style=wx.DEFAULT_DIALOG_STYLE | wx.STAY_ON_TOP | wx.RESIZE_BORDER)
         self.SetIcon(wx.Icon(wx.Image(Config.icon).ConvertToBitmap()))
         
         self.init_Load_UI()
@@ -52,15 +52,15 @@ class UpdateWindow(wx.Dialog):
         self.panel.SetSizer(self.sizer)
 
     def onCheckUpdate(self):
-        def checkUpdate():
+        def check():
             try:
-                info = check_update()
+                info = checkUpdate()
             except:
                 wx.CallAfter(self.init_error_UI)
                 return
             
             wx.CallAfter(self.init_real_UI,info)
-        threading.Thread(target=checkUpdate).start()
+        threading.Thread(target=check).start()
 
     def init_real_UI(self,info):
         ## 清空原有元素
