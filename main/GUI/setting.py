@@ -24,6 +24,7 @@ class SettingWindow(wx.Frame):
     ID_HIDE_CURRENT_CHECKBOX = wx.NewId()
     ID_CLICK_TO_HIDE_CHECKBOX = wx.NewId()
     ID_HIDE_ICON_AFTER_HIDE_CHECKBOX = wx.NewId()
+    ID_PATH_MATCH_CHECKBOX = wx.NewId()
     ID_RESET_BTN = wx.NewId()
     ID_SAVE_BTN = wx.NewId()
     
@@ -148,6 +149,14 @@ class SettingWindow(wx.Frame):
         hide_icon_after_hide_sizer.Add(hide_icon_after_hide_checkbox,proportion=1, flag=wx.EXPAND| wx.ALL)
         settings_checkbox_sizer.Add(hide_icon_after_hide_sizer, proportion=1,flag=wx.EXPAND| wx.ALL, border=10)
         
+        path_match_sizer=wx.BoxSizer(wx.HORIZONTAL)
+        path_match_label = wx.StaticText(panel, label="文件路径匹配")
+        path_match_label.SetToolTip(wx.ToolTip("启用文件路径匹配可以匹配同一程序的不同窗口"))
+        path_match_checkbox = wx.CheckBox(panel, self.ID_PATH_MATCH_CHECKBOX, "")
+        path_match_sizer.Add(path_match_label,proportion=1, flag=wx.EXPAND| wx.ALL)
+        path_match_sizer.Add(path_match_checkbox,proportion=1, flag=wx.EXPAND| wx.ALL)
+        settings_checkbox_sizer.Add(path_match_sizer, proportion=1,flag=wx.EXPAND| wx.ALL, border=10)
+        
         bottom_sizer.Add(settings_checkbox_sizer, flag=wx.EXPAND| wx.ALL, border=10)
         
         #设置提示
@@ -193,6 +202,7 @@ class SettingWindow(wx.Frame):
         hide_current_checkbox = self.FindWindowById(self.ID_HIDE_CURRENT_CHECKBOX)
         click_to_hide_checkbox = self.FindWindowById(self.ID_CLICK_TO_HIDE_CHECKBOX)
         hide_icon_after_hide_checkbox = self.FindWindowById(self.ID_HIDE_ICON_AFTER_HIDE_CHECKBOX)
+        path_match_checkbox = self.FindWindowById(self.ID_PATH_MATCH_CHECKBOX)
         
         hide_show_hotkey_text.SetValue(Config.hide_hotkey)
         close_hotkey_text.SetValue(Config.close_hotkey)
@@ -201,6 +211,7 @@ class SettingWindow(wx.Frame):
         hide_current_checkbox.SetValue(Config.hide_current)
         click_to_hide_checkbox.SetValue(Config.click_to_hide)
         hide_icon_after_hide_checkbox.SetValue(Config.hide_icon_after_hide)
+        path_match_checkbox.SetValue(Config.path_match)
         self.InsertTreeList(Config.hide_binding, self.right_treelist, True)
         self.RefreshLeftList()
 
@@ -212,6 +223,7 @@ class SettingWindow(wx.Frame):
         hide_current_checkbox = self.FindWindowById(self.ID_HIDE_CURRENT_CHECKBOX)
         click_to_hide_checkbox = self.FindWindowById(self.ID_CLICK_TO_HIDE_CHECKBOX)
         hide_icon_after_hide_checkbox = self.FindWindowById(self.ID_HIDE_ICON_AFTER_HIDE_CHECKBOX)
+        path_match_checkbox = self.FindWindowById(self.ID_PATH_MATCH_CHECKBOX)
         
         Config.hide_hotkey = hide_show_hotkey_text.GetValue()
         Config.close_hotkey = close_hotkey_text.GetValue()
@@ -220,6 +232,7 @@ class SettingWindow(wx.Frame):
         Config.hide_current = hide_current_checkbox.GetValue()
         Config.click_to_hide = click_to_hide_checkbox.GetValue()
         Config.hide_icon_after_hide = hide_icon_after_hide_checkbox.GetValue()
+        Config.path_match = path_match_checkbox.GetValue()
         
         # 获取Windows对象列表
         Config.hide_binding = self.ItemsData(self.right_treelist, only_checked=False)
@@ -252,6 +265,7 @@ class SettingWindow(wx.Frame):
         hide_current_checkbox = self.FindWindowById(self.ID_HIDE_CURRENT_CHECKBOX)
         click_to_hide_checkbox = self.FindWindowById(self.ID_CLICK_TO_HIDE_CHECKBOX)
         hide_icon_after_hide_checkbox = self.FindWindowById(self.ID_HIDE_ICON_AFTER_HIDE_CHECKBOX)
+        path_match_checkbox = self.FindWindowById(self.ID_PATH_MATCH_CHECKBOX)
         
         hide_show_hotkey_text.SetValue("Ctrl+Q")
         close_hotkey_text.SetValue("Win+Esc")
@@ -260,6 +274,7 @@ class SettingWindow(wx.Frame):
         hide_current_checkbox.SetValue(True)
         click_to_hide_checkbox.SetValue(False)
         hide_icon_after_hide_checkbox.SetValue(False)
+        path_match_checkbox.SetValue(False)
         self.InsertTreeList([], self.right_treelist, True)
         self.RefreshLeftList()
         
@@ -291,6 +306,23 @@ class SettingWindow(wx.Frame):
         self.recordHotkey(hide_show_hotkey_text, hide_show_hotkey_btn)
 
     def OnClose(self, e):
+        # 确保清除所有的事件处理器
+        try:
+            for child in self.GetChildren():
+                # 确保每个子组件的事件处理器被清理
+                if hasattr(child, 'PopEventHandler'):
+                    while child.GetEventHandler() != child:
+                        child.PopEventHandler(True)
+            
+            # 断开树列表的事件绑定
+            if hasattr(self, 'left_treelist') and self.left_treelist:
+                self.left_treelist.Unbind(dataview.EVT_TREELIST_ITEM_CHECKED)
+            
+            if hasattr(self, 'right_treelist') and self.right_treelist:
+                self.right_treelist.Unbind(dataview.EVT_TREELIST_ITEM_CHECKED)
+        except Exception as e:
+            print(f"清理事件处理器时出错: {str(e)}")
+        
         self.Hide()
 
     def OnRecordCL(self, e):

@@ -79,5 +79,22 @@ if __name__ == '__main__':
     Config.SettingWindow=setting.SettingWindow()
     if Config.first_start:
         Config.SettingWindow.Show()
-    app.MainLoop()
     
+    # 添加事件处理器清理函数
+    def cleanup():
+        if Config.HotkeyListener:
+            Config.HotkeyListener.stop()
+        # 确保所有窗口在退出前销毁
+        if hasattr(Config, 'SettingWindow') and Config.SettingWindow:
+            if Config.SettingWindow.GetEventHandler() != Config.SettingWindow:
+                Config.SettingWindow.PopEventHandler(True)
+            Config.SettingWindow.Destroy()
+        if hasattr(Config, 'TaskBarIcon') and Config.TaskBarIcon:
+            Config.TaskBarIcon.Destroy()
+    
+    # 注册清理函数
+    import atexit
+    atexit.register(cleanup)
+    
+    app.MainLoop()
+

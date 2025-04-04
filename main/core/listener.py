@@ -7,6 +7,7 @@ from pynput import keyboard
 import multiprocessing
 import threading
 import time
+import wx
 
 class HotkeyListener():
     def __init__(self):
@@ -34,18 +35,27 @@ class HotkeyListener():
                     tool.sendNotify("Boss Key已停止服务", "Boss Key已成功退出")
                     self.ShowWindows()
                     self.stop()
+                    # 先解除所有窗口的事件处理器绑定
                     try:
-                        Config.SettingWindow.Destroy()
-                        Config.TaskBarIcon.Destroy()
-                        Config.UpdateWindow.Destroy()
-                    except:
-                        pass
+                        if Config.SettingWindow:
+                            for child in Config.SettingWindow.GetChildren():
+                                if hasattr(child, 'Destroy'):
+                                    child.Destroy()
+                            Config.SettingWindow.Destroy()
+                        if Config.TaskBarIcon:
+                            Config.TaskBarIcon.Destroy()
+                        if Config.UpdateWindow:
+                            Config.UpdateWindow.Destroy()
+                    except Exception as e:
+                        print(f"清理窗口时出错: {e}")
                     exit_flag = True
                     break
-            except:
+            except Exception as e:
+                print(f"处理队列消息时出错: {e}")
                 pass
 
         if exit_flag:
+            wx.CallAfter(wx.GetApp().ExitMainLoop)
             sys.exit(0)
 
     def reBind(self):
@@ -107,7 +117,7 @@ class HotkeyListener():
 
         for i in outer:
             for j in inner:
-                if tool.isSameWindow(i, j, False):
+                if tool.isSameWindow(i, j, False, not Config.path_match):
                     if outer==Config.hide_binding: # 此时i是绑定的元素，j是窗口元素，需要隐藏j
                         needHide.append(j.hwnd)
                     else:
