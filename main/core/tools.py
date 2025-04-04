@@ -199,7 +199,6 @@ def isSameWindow(w1:WindowInfo, w2:WindowInfo, auto=False, strict=True):
     PID_same = w1.PID == w2.PID
     process_same = process_name_same or PID_same
 
-    print(w1.process)
     ## 非严格模式下
     if not strict:
         ## 进程名称、路径相同则同一个
