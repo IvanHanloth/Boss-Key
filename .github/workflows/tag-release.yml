@@ -82,6 +82,7 @@ jobs:
           draft: false
           prerelease: false
           generate_release_notes: true
+          discussion_category_name: announcements
 
   compile-to-installer:
     runs-on: windows-latest
