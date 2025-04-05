@@ -4,11 +4,12 @@ import json
 from .icon import get_icon
 from configparser import ConfigParser
 from io import BytesIO
+from .model import WindowInfo
  
 class Config:
     AppName = "Boss Key"
-    AppVersion = "v2.0.2.0"
-    AppReleaseDate = "2025-02-02"
+    AppVersion = "v2.0.3.0"
+    AppReleaseDate = "2025-04-05"
     AppAuthor = "IvanHanloth"
     AppDescription = "老板来了？快用Boss-Key老板键一键隐藏静音当前窗口！上班摸鱼必备神器"
     AppCopyRight = "Copyright © 2022-2025 Ivan Hanloth All Rights Reserved."
@@ -48,6 +49,7 @@ SOFTWARE.
 
     click_to_hide = True
     hide_icon_after_hide = False
+    path_match = False
 
     hide_binding = []
     
@@ -57,11 +59,10 @@ SOFTWARE.
     # 判断是否为首次启动
     first_start = not os.path.exists(config_path)
 
-    SettingWindow=""
     TaskBarIcon=""
-    UpdateWindow=""
-
     HotkeyListener= ""
+    SettingWindowId = -1
+    UpdateWindowId = -1
     
     recording_hotkey = False
     recorded_hotkey = None
@@ -87,13 +88,15 @@ SOFTWARE.
         Config.send_before_hide = config.get("setting", {}).get("send_before_hide", False)
         Config.hide_current = config.get("setting", {}).get("hide_current", True)
         Config.hide_icon_after_hide = config.get("setting", {}).get("hide_icon_after_hide", False)
+        Config.path_match = config.get("setting", {}).get("path_match", False)
         
         Config.click_to_hide= config.get("setting", {}).get("click_to_hide", True)
 
         Config.hide_hotkey = config.get("hotkey", {}).get("hide_hotkey", "Ctrl+Q")
         Config.close_hotkey = config.get("hotkey", {}).get("close_hotkey", "Win+Esc")
 
-        Config.hide_binding = config.get("hide_binding", [])
+        # 将hide_binding从字典列表转换为WindowInfo对象列表
+        Config.hide_binding = [WindowInfo.from_dict(item) for item in config.get("hide_binding", [])]
 
         if config.get('version', '') != Config.AppVersion:
             Config.save()
@@ -113,9 +116,11 @@ SOFTWARE.
                 'send_before_hide': Config.send_before_hide,
                 'hide_current': Config.hide_current,
                 'click_to_hide': Config.click_to_hide,
-                'hide_icon_after_hide': Config.hide_icon_after_hide
+                'hide_icon_after_hide': Config.hide_icon_after_hide,
+                'path_match': Config.path_match
             },
-            "hide_binding" : Config.hide_binding
+            # 将WindowInfo对象列表转换为字典列表用于JSON序列化
+            "hide_binding": [item.to_dict() if isinstance(item, WindowInfo) else item for item in Config.hide_binding]
         }
 
         with open(Config.config_path, 'w', encoding='utf-8') as f:
