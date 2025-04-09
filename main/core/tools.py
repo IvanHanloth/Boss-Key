@@ -112,6 +112,12 @@ def changeMute(hwnd,flag=1):
                     break
     except Exception as e:
         print("tools-changeMute: ",e)
+    finally:
+        # 释放 COM 环境
+        try:    
+            pythoncom.CoUninitialize()
+        except:
+            pass
 
 def remove_duplicates(input_list: list):
     """
