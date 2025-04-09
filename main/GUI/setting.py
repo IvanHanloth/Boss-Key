@@ -148,10 +148,17 @@ class SettingWindow(wx.Frame):
         settings_checkbox_sizer.Add(hide_icon_after_hide_sizer, proportion=1,flag=wx.EXPAND| wx.ALL, border=10)
         
         path_match_sizer=wx.BoxSizer(wx.HORIZONTAL)
+        path_icon_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        path_match_tooltip = "启用此选项可以一键隐藏绑定程序的所有窗口\r\n关闭此选项后，将会智能精确隐藏指定窗口"
         path_match_label = wx.StaticText(panel, label="文件路径匹配")
-        path_match_label.SetToolTip(wx.ToolTip("启用文件路径匹配可以匹配同一程序的不同窗口"))
+        path_match_label.SetToolTip(path_match_tooltip)
         path_match_checkbox = wx.CheckBox(panel, self.ID_PATH_MATCH_CHECKBOX, "")
-        path_match_sizer.Add(path_match_label,proportion=1, flag=wx.EXPAND| wx.ALL)
+        path_match_tooltip_icon = wx.StaticBitmap(panel, bitmap=wx.ArtProvider.GetBitmap(wx.ART_INFORMATION, wx.ART_OTHER, self.FromDIP((14, 14))))
+        path_match_tooltip_icon.SetToolTip(path_match_tooltip)
+        path_icon_sizer.Add(path_match_label,flag=wx.EXPAND| wx.ALL)
+        path_icon_sizer.AddSpacer(5)
+        path_icon_sizer.Add(path_match_tooltip_icon,flag=wx.EXPAND| wx.ALL)
+        path_match_sizer.Add(path_icon_sizer, proportion=1,flag=wx.EXPAND| wx.ALL)
         path_match_sizer.Add(path_match_checkbox,proportion=1, flag=wx.EXPAND| wx.ALL)
         settings_checkbox_sizer.Add(path_match_sizer, proportion=1,flag=wx.EXPAND| wx.ALL, border=10)
         

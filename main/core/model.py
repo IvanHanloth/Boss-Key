@@ -43,4 +43,5 @@ class WindowInfo:
         return (self.hwnd == other.hwnd and 
                 self.process == other.process and 
                 self.PID == other.PID and 
-                self.title == other.title)
+                self.title == other.title and
+                self.path == other.path)
