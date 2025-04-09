@@ -8,6 +8,7 @@ import core.vkMap as vkMap
 import datetime
 import requests
 import json
+import pythoncom
 
 from core.model import WindowInfo
 
@@ -97,16 +98,18 @@ def changeMute(hwnd,flag=1):
     flag=1 mute
     """
     try:
+        # 初始化 COM 环境
+        pythoncom.CoInitialize()
         hwnd=int(hwnd)
         process=win32process.GetWindowThreadProcessId(hwnd)
         sessions = AudioUtilities.GetAllSessions()
         for session in sessions:
             volume = session.SimpleAudioVolume
-            if session.Process and session.Process.name() == psutil.Process(process[1]).name():
+            if session.Process and session.Process.name() == psutil.Process(process[1]).name() or session.Process.pid == process[1]:
                 volume.SetMute(flag, None)
                 break
-    except:
-        pass
+    except Exception as e:
+        print(e)
 
 def remove_duplicates(input_list: list):
     """
