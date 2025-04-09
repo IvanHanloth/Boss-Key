@@ -8,8 +8,8 @@ from .model import WindowInfo
  
 class Config:
     AppName = "Boss Key"
-    AppVersion = "v2.0.3.0"
-    AppReleaseDate = "2025-04-05"
+    AppVersion = "v2.0.4.0"
+    AppReleaseDate = "2025-04-09"
     AppAuthor = "IvanHanloth"
     AppDescription = "老板来了？快用Boss-Key老板键一键隐藏静音当前窗口！上班摸鱼必备神器"
     AppCopyRight = "Copyright © 2022-2025 Ivan Hanloth All Rights Reserved."
@@ -49,7 +49,7 @@ SOFTWARE.
 
     click_to_hide = True
     hide_icon_after_hide = False
-    path_match = False
+    path_match = True
 
     hide_binding = []
     
