@@ -100,16 +100,18 @@ def changeMute(hwnd,flag=1):
     try:
         # 初始化 COM 环境
         pythoncom.CoInitialize()
-        hwnd=int(hwnd)
-        process=win32process.GetWindowThreadProcessId(hwnd)
+        process=win32process.GetWindowThreadProcessId(int(hwnd)) # 获取窗口句柄对应的进程ID
+        process=psutil.Process(process[1]) # 获取进程对象
+        # 获取所有音频会话
         sessions = AudioUtilities.GetAllSessions()
         for session in sessions:
             volume = session.SimpleAudioVolume
-            if session.Process and session.Process.name() == psutil.Process(process[1]).name() or session.Process.pid == process[1]:
-                volume.SetMute(flag, None)
-                break
+            if session.Process:
+                if session.Process.ppid == process.ppid() or session.Process.exe() == process.exe() or session.Process.pid == process.pid or session.Process.ppid == process.pid:
+                    volume.SetMute(flag, None)
+                    break
     except Exception as e:
-        print(e)
+        print("tools-changeMute: ",e)
 
 def remove_duplicates(input_list: list):
     """
